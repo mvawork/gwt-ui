@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="ShowCase:war exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/ShowCase_war_exploded</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="showcase/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="showcase" />
+        </element>
+      </element>
+      <element id="gwt-compiler-output" facet="showcase/gwt/GWT" />
+    </root>
+  </artifact>
+</component>
