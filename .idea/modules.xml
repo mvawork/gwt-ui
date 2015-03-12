@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/gwt-ui/gwt-ui.iml" filepath="$PROJECT_DIR$/gwt-ui/gwt-ui.iml" />
       <module fileurl="file://$PROJECT_DIR$/showcase/showcase.iml" filepath="$PROJECT_DIR$/showcase/showcase.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ui/ui.iml" filepath="$PROJECT_DIR$/ui/ui.iml" />
     </modules>
   </component>
 </project>
