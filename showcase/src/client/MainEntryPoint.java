@@ -1,5 +1,6 @@
 package client;
 
+import client.sliders.SimpleHorizontalSliderBar;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -14,6 +15,8 @@ import java.util.List;
 
 public class MainEntryPoint implements EntryPoint {
 
+
+
     public void onModuleLoad() {
         List<Integer> l = Arrays.asList(3, 6, 12, 18, 24);
         final ArrayList<Integer> srokList = new ArrayList<>(l);
@@ -25,7 +28,7 @@ public class MainEntryPoint implements EntryPoint {
 
         RootPanel.get().add(srokListBox);
 
-        final HorizontalSliderBar<Integer> sliderBar = new HorizontalSliderBar<>();
+        final HorizontalSliderBar<Integer> sliderBar = new SimpleHorizontalSliderBar();
         sliderBar.setPixelSize(400, 50);
         sliderBar.setValues(srokList);
 

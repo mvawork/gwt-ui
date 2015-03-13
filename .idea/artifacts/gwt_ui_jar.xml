@@ -3,6 +3,7 @@
     <output-path>$PROJECT_DIR$/out/artifacts/gwt_ui_jar</output-path>
     <root id="archive" name="gwt-ui.jar">
       <element id="module-output" name="gwt-ui" />
+      <element id="dir-copy" path="$PROJECT_DIR$/gwt-ui/src/main/java" />
     </root>
   </artifact>
 </component>

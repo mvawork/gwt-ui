@@ -1,30 +1,23 @@
 package ru.mvawork.gwt.client.ui.sliders;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.InlineLabel;
 import ru.mvawork.gwt.client.ui.events.BarValueChangeEvent;
 
 import java.util.ArrayList;
 
-public class HorizontalSliderBar<T> extends Composite implements BarValueChangeEvent.HasBarValueChangeHandler {
+public abstract class HorizontalSliderBar<T> extends Composite implements BarValueChangeEvent.HasBarValueChangeHandler {
 
-
-    public interface Resources extends ClientBundle {
-        @Source("polzunok.png")
-        ImageResource polzunok();
-        @Source("HorizontalSliderBar.css")
-        Style style();
-    }
 
     public interface Style extends CssResource {
         String slider();
@@ -36,27 +29,13 @@ public class HorizontalSliderBar<T> extends Composite implements BarValueChangeE
         String markLabel();
     }
 
-    public static class Appearance {
-
-        private Resources resources;
-
-        public Appearance() {
-            this.resources = GWT. create(Resources.class);
-            resources.style().ensureInjected();
-        }
-
-        public Resources getResources() {
-            return resources;
-        }
-    }
-
     private class DragPanel extends FlowPanel {
 
         private boolean inDrag = true;
         private int touchPosition, minTouchPosition, maxTouchPosition ;
 
         public DragPanel() {
-            setStyleName(style.drag());
+            setStyleName(getStyle().drag());
             sinkEvents(Event.ONMOUSEDOWN | Event.ONMOUSEMOVE | Event.ONMOUSEUP);
         }
 
@@ -98,10 +77,6 @@ public class HorizontalSliderBar<T> extends Composite implements BarValueChangeE
         }
     }
 
-    private static final Appearance appearance = new Appearance();
-
-    private Style style = appearance.getResources().style();
-
     private AbsolutePanel rootPanel;
     private AbsolutePanel scale;
     private DragPanel drag;
@@ -118,12 +93,14 @@ public class HorizontalSliderBar<T> extends Composite implements BarValueChangeE
 
     private ArrayList<T> values;
 
+    public abstract Style getStyle();
+
     public HorizontalSliderBar() {
         rootPanel = new AbsolutePanel();
-        rootPanel.setStyleName(style.slider());
+        rootPanel.setStyleName(getStyle().slider());
         /* Шкала */
         scale = new AbsolutePanel();
-        scale.setStyleName(style.scale());
+        scale.setStyleName(getStyle().scale());
         scale.addDomHandler(new MouseDownHandler() {
             @Override
             public void onMouseDown(MouseDownEvent event) {
@@ -134,16 +111,17 @@ public class HorizontalSliderBar<T> extends Composite implements BarValueChangeE
         }, MouseDownEvent.getType());
 
         progress = new FlowPanel();
-        progress.setStyleName(style.progress());
+        progress.setStyleName(getStyle().progress());
         scale.add(progress);
         rootPanel.add(scale);
         drag = new DragPanel();
         rootPanel.add(drag);
         marks = new AbsolutePanel();
-        marks.setStyleName(style.marks());
+        marks.setStyleName(getStyle().marks());
         rootPanel.add(marks);
         initWidget(rootPanel);
     }
+
 
 
     @Override
@@ -221,12 +199,12 @@ public class HorizontalSliderBar<T> extends Composite implements BarValueChangeE
         for (Object value : values) {
             /* Отметки шкалы */
             InlineLabel m = new InlineLabel();
-            m.setStyleName(style.markTic());
+            m.setStyleName(getStyle().markTic());
             marks.add(m);
             marks.setWidgetPosition(m, markLeft, 0);
             /* Надписи на шкале */
             InlineLabel l = new InlineLabel(value.toString());
-            l.setStyleName(style.markLabel());
+            l.setStyleName(getStyle().markLabel());
             marks.add(l);
             labelWidth = l.getOffsetWidth();
             labelRight = Math.min(markLeft + labelWidth, scaleWidth);
