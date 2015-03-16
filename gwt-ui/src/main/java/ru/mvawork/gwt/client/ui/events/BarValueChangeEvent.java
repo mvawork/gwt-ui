@@ -5,7 +5,7 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 
-public class BarValueChangeEvent <T> extends GwtEvent<BarValueChangeEvent.BarValueChangeHandler> {
+public class BarValueChangeEvent extends GwtEvent<BarValueChangeEvent.BarValueChangeHandler> {
 
     public interface BarValueChangeHandler extends EventHandler{
         void onBarValueChanged(BarValueChangeEvent event);
@@ -16,17 +16,6 @@ public class BarValueChangeEvent <T> extends GwtEvent<BarValueChangeEvent.BarVal
     }
 
     public static Type<BarValueChangeHandler> type = new Type<>();
-
-    private final T value;
-
-    public BarValueChangeEvent(T value) {
-        this.value = value;
-    }
-
-    public T getValue() {
-        return value;
-    }
-
 
     public static Type<BarValueChangeHandler> getType() {
         return type;

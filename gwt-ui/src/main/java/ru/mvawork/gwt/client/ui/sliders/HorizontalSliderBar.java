@@ -71,7 +71,7 @@ public abstract class HorizontalSliderBar<T> extends Composite implements BarVal
                     event.stopPropagation();
                     inDrag = false;
                     DOM.releaseCapture(drag.getElement());
-                    setIntValue(getIntValueFromPosition(getDragPosition()));
+                    setSelectedIndex(getIndexFromPosition(getDragPosition()));
                     break;
             }
         }
@@ -84,7 +84,7 @@ public abstract class HorizontalSliderBar<T> extends Composite implements BarVal
     private AbsolutePanel marks;
 
 
-    private int maxVal, curVal;
+    private int maxIndex, index;
     private int minDragPos, maxDragPos;
 
     private int barWidth;
@@ -106,7 +106,7 @@ public abstract class HorizontalSliderBar<T> extends Composite implements BarVal
             public void onMouseDown(MouseDownEvent event) {
                 event.stopPropagation();
                 event.preventDefault();
-                setIntValue(getIntValueFromPosition(event.getRelativeX(scale.getElement())));
+                setSelectedIndex(getIndexFromPosition(event.getRelativeX(scale.getElement())));
             }
         }, MouseDownEvent.getType());
 
@@ -143,7 +143,7 @@ public abstract class HorizontalSliderBar<T> extends Composite implements BarVal
         return value > maxValue ? maxValue: value;
     }
 
-    private int getIntValueFromPosition(int position) {
+    private int getIndexFromPosition(int position) {
         return Math.round((float)(position - minDragPos)/step);
     }
 
@@ -154,13 +154,22 @@ public abstract class HorizontalSliderBar<T> extends Composite implements BarVal
 
     }
 
-    private void setIntValue(int value){
-        value = (value > maxVal) ? maxVal : value;
-        curVal = (value < 0) ? 0 : value;
-        fireEvent(new BarValueChangeEvent<>(values.get(value)));
+    public void setSelectedIndex(int index){
+        index = (index > maxIndex) ? maxIndex : index;
+        this.index = (index < 0) ? 0 : index;
+        fireEvent(new BarValueChangeEvent());
         if (!isAttached())
             return;
-        setDragPosition(curVal * step);
+        setDragPosition(this.index * step);
+    }
+
+    public int getSelectedIndex() {
+        return index;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public T getValue(int index) {
+        return values.get(index);
     }
 
     private void drawScrollBar() {
@@ -181,16 +190,16 @@ public abstract class HorizontalSliderBar<T> extends Composite implements BarVal
         int scaleLeft = (int) Math.floor(drag.getOffsetWidth() / 2 + 0.5);
         int scaleWidth = barWidth - scaleLeft * 2;
         /* Ширина шкалы пропрционально количеству значений */
-        scaleWidth = scaleWidth - scaleWidth % maxVal;
+        scaleWidth = scaleWidth - scaleWidth % maxIndex;
         scale.setWidth(scaleWidth + "px");
         /* Максимальная позиция левого края ползунка */
         maxDragPos = minDragPos + scaleWidth;
         /* Шаг перемещения ползунка */
-        step = scaleWidth / maxVal;
+        step = scaleWidth / maxIndex;
         /* Разместить шкалу */
         rootPanel.setWidgetPosition(scale, scaleLeft, scaleTop);
         /* Разместить ползунок */
-        setIntValue(curVal);
+        setSelectedIndex(index);
         /* Разместить линейку шкалы */
         marks.clear();
         rootPanel.setWidgetPosition(marks, scaleLeft, scaleTop + h2);
@@ -218,16 +227,12 @@ public abstract class HorizontalSliderBar<T> extends Composite implements BarVal
 
     public void setValues(ArrayList<T> values) {
         this.values = values;
-        maxVal = values.size() - 1;
-        if (maxVal == 0)
+        maxIndex = values.size() - 1;
+        if (maxIndex == 0)
             throw new RuntimeException("Quantity of values less than 2");
 
         if (isAttached())
             drawScrollBar();
-    }
-
-    public void setValue(T value) {
-        setIntValue(values.indexOf(value));
     }
 
     @Override

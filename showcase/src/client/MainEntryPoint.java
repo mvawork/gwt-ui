@@ -37,7 +37,7 @@ public class MainEntryPoint implements EntryPoint {
         srokListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                sliderBar.setValue(srokList.get(srokListBox.getSelectedIndex()));
+                sliderBar.setSelectedIndex(srokListBox.getSelectedIndex());
 
             }
         });
@@ -45,12 +45,11 @@ public class MainEntryPoint implements EntryPoint {
         sliderBar.addBarValueChangeHandler(new BarValueChangeEvent.BarValueChangeHandler() {
             @Override
             public void onBarValueChanged(BarValueChangeEvent event) {
-                Integer v = (Integer)event.getValue();
-                srokListBox.setSelectedIndex(srokList.indexOf(v));
+                srokListBox.setSelectedIndex(sliderBar.getSelectedIndex());
             }
         });
 
-        sliderBar.setValue(srokList.get(defSrok));
+        sliderBar.setSelectedIndex(srokList.size() - 1);
 
     }
 
