@@ -16,12 +16,12 @@ import java.util.logging.Logger;
 
 public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, KeyPressHandler, KeyDownHandler {
 
-    RegExp regExp = RegExp.compile("^\\d*(\\.\\d{0,2})?$");
+    RegExp regExp = RegExp.compile("^\\d*(\\.\\d*)?$");
 
 
     private static final Logger log = Logger.getLogger(CurrencyBox.class.getName());
 
-    private static String getFormatedInput(CharSequence text) {
+    private static String getClearInput(CharSequence text) {
         StringBuilder sb = new StringBuilder();
         for (int pos = 0; pos < text.length(); pos++) {
             Character c = text.charAt(pos);
@@ -37,7 +37,7 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
         public String render(BigDecimal object) {
             if (object == null)
                 return "";
-            String s = object.setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString();
+            String s = object.setScale(2, BigDecimal.ROUND_FLOOR).toPlainString();
             int l = s.length() - 3;
             StringBuilder sb = new StringBuilder();
             int z = l % 3;
@@ -50,10 +50,8 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
             }
             /* Добавить дробную часть */
             s = s.substring(z+1, z+3);
-            if (!s.equals("00")) {
-                sb.append(".");
-                sb.append(s);
-            }
+            sb.append(".");
+            sb.append(s);
 
             return sb.toString();
         }
@@ -64,7 +62,7 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
         @Override
         public BigDecimal parse(CharSequence text) throws ParseException {
             try {
-                return text == null ? null : new BigDecimal(getFormatedInput(text));
+                return text == null ? null : new BigDecimal(getClearInput(text));
             } catch (NumberFormatException e) {
                 return null;
             }
@@ -84,7 +82,7 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
 
     private boolean checkInputText(String text) {
         log.fine(text);
-        text = getFormatedInput(text);
+        text = getClearInput(text);
         MatchResult matchResult = regExp.exec(text);
         return matchResult != null && matchResult.getInput().equals(text);
     }
@@ -98,7 +96,7 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
                 Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                     @Override
                     public void execute() {
-                        if (!checkInputText(getFormatedInput(getText())))
+                        if (!checkInputText(getClearInput(getText())))
                             setText(text);
                     }
                 });
@@ -112,23 +110,88 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
         setValue(getValue());
     }
 
+
+    private String reformat(String text) {
+        StringBuilder sb = new StringBuilder();
+        int digitNum = 0;
+
+        boolean allowDecimalSeparator = text.indexOf('.') != -1;
+        char c;
+        label1:
+        for (int i = text.length(); i > 0; i--) {
+            c = text.charAt(i-1);
+            switch (c) {
+                case ' ':
+                    break;
+                case '.':
+                    if (allowDecimalSeparator) {
+                        sb.append(c);
+                        allowDecimalSeparator = false;
+                        break;
+                    } else {
+                        break label1;
+                    }
+                case '0':case '1':case '2':case '3':case '4':
+                case '5':case '6':case '7':case '8':case '9':
+                    if (!allowDecimalSeparator) {
+                        digitNum++;
+                        if (digitNum > 3 && digitNum%3 == 1)
+                            sb.append(' ');
+                    }
+                    sb.append(c);
+                    break;
+                default:
+                    break label1;
+            }
+        }
+        sb.reverse();
+        return sb.toString();
+    }
+
+
     @Override
     public void onKeyPress(KeyPressEvent event) {
-        Character c = event.getCharCode();
-        if (Character.isDigit(c) || c.equals('.')) {
+        char c = event.getCharCode();
+        if (Character.isDigit(c) || c =='.') {
             String text = getText();
+            StringBuilder sb = new StringBuilder();
+            int pos = getCursorPos();
             if (text != null && !text.isEmpty()) {
-                StringBuilder sb = new StringBuilder();
-                int pos = getCursorPos();
                 sb.append(text, 0, pos);
                 sb.append(c);
                 sb.append(text, pos + getSelectionLength(), text.length());
-                if (!checkInputText(sb.toString()))
-                    cancelKey();
+            } else {
+                if (c == '.') {
+                    sb.append("0");
+                    pos++;
+                }
+                sb.append(c);
             }
-        } else {
-            cancelKey();
+            text = sb.toString();
+            String s = reformat(text.substring(0, pos+1));
+            log.fine(s);
+            text = reformat(text);
+            setText(text);
+            setCursorPos(s.length());
+            /*if (checkInputText(text)) {
+                // Форматированная сторка
+                String s1 = moneyRender.render(new BigDecimal(getClearInput(text)));
+                // Строка по точку ввода очищенная от пробелов
+                String s2 = getClearInput(text.substring(0, pos + 1));
+                int e = 0;
+                for (int i = 0; i < s2.length(); i++)
+                    for (int j = e; j < s1.length(); j++) {
+                        if (s2.charAt(i) == s1.charAt(j)) {
+                            e = j + 1;
+                            break;
+                        }
+                    }
+                setText(s1);
+                setCursorPos(e);
+            }*/
+
         }
+        cancelKey();
     }
 
     @Override
@@ -143,7 +206,7 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
                     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                         @Override
                         public void execute() {
-                            if (!checkInputText(getFormatedInput(getText())))
+                            if (!checkInputText(getClearInput(getText())))
                                 setText(text);
                         }
                     });
