@@ -168,28 +168,24 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
                 sb.append(c);
             }
             text = sb.toString();
-            String s = reformat(text.substring(0, pos+1));
-            log.fine(s);
+            String s = text.substring(0, pos+1);
             text = reformat(text);
             setText(text);
-            setCursorPos(s.length());
-            /*if (checkInputText(text)) {
-                // Форматированная сторка
-                String s1 = moneyRender.render(new BigDecimal(getClearInput(text)));
-                // Строка по точку ввода очищенная от пробелов
-                String s2 = getClearInput(text.substring(0, pos + 1));
-                int e = 0;
-                for (int i = 0; i < s2.length(); i++)
-                    for (int j = e; j < s1.length(); j++) {
-                        if (s2.charAt(i) == s1.charAt(j)) {
-                            e = j + 1;
-                            break;
-                        }
-                    }
-                setText(s1);
-                setCursorPos(e);
-            }*/
 
+            for (int j = 0, i = 0; i <s.length(); i++) {
+                if (s.charAt(i) == ' ')
+                    continue;
+                while (text.charAt(j) == ' ') {
+                    j++;
+                }
+                /* Исключительная ситуация, идем в конец форматированной строки */
+                if (s.charAt(i) != text.charAt(j)) {
+                    pos = text.length();
+                    break;
+                }
+                pos = ++j;
+            }
+            setCursorPos(pos);
         }
         cancelKey();
     }
