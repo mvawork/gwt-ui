@@ -181,33 +181,38 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
         setCursorPos(cursorPos);
     }
 
+    private void trySetText(String text, int cursorPos) {
+        try {
+            setText(text, cursorPos);
+        } catch (CurrencyFormatException e) {
+            //ToDo fire event InvalidInput
+        }
+    }
 
     @Override
     public void onKeyPress(KeyPressEvent event) {
-        try {
-            char c = event.getCharCode();
-            if (Character.isDigit(c) || c == '.') {
-                String text = getText();
-                StringBuilder sb = new StringBuilder();
-                int pos = getCursorPos();
-                if (text != null && !text.isEmpty()) {
-                    sb.append(text, 0, pos);
-                    sb.append(c);
-                    sb.append(text, pos + getSelectionLength(), text.length());
-                } else {
-                    if (c == '.') {
-                        sb.append("0");
-                        pos++;
-                    }
-                    sb.append(c);
+
+        char c = event.getCharCode();
+
+        if (Character.isDigit(c) || c == '.') {
+            String text = getText();
+            StringBuilder sb = new StringBuilder();
+            int pos = getCursorPos();
+            if (text != null && !text.isEmpty()) {
+                sb.append(text, 0, pos);
+                sb.append(c);
+                sb.append(text, pos + getSelectionLength(), text.length());
+            } else {
+                if (c == '.') {
+                    sb.append("0");
+                    pos++;
                 }
-                setText(sb.toString(), pos + 1);
+                sb.append(c);
             }
-        } catch (CurrencyFormatException e) {
-            //ToDo fire event InvalidInput
-        } finally {
-            cancelKey();
+            setText(sb.toString(), pos + 1);
         }
+        if (c != 0)
+            cancelKey();
 
     }
 
@@ -238,12 +243,16 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
                             sb.append(text, 0, pos);
                             int s = getSelectionLength();
                             if  (s == 0) {
-                                sb.append(text, pos + 1, l);
+                                if (text.charAt(pos) == ' ' && pos < l - 1) {
+                                    sb.append(text, pos + 2, l);
+                                } else {
+                                    sb.append(text, pos + 1, l);
+                                }
                             } else {
                                 sb.append(text, pos + s, l);
                             }
-                            if (!checkInputText(sb.toString()))
-                                cancelKey();
+                            trySetText(sb.toString(), pos);
+                            cancelKey();
                         }
                     }
                 }
@@ -261,12 +270,10 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
                             sb.append(text, 0, pos -1);
                             sb.append(text, pos, l);
                         }
-                        if (!checkInputText(sb.toString()))
-                            cancelKey();
+                        trySetText(sb.toString(), pos - 1);
+                        cancelKey();
                     }
                 }
-                break;
-            default:
                 break;
         }
 
