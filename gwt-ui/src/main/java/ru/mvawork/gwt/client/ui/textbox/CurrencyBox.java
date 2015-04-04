@@ -21,6 +21,23 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
 
     private static final Logger log = Logger.getLogger(CurrencyBox.class.getName());
 
+    public static class CurrencyFormatException extends IllegalArgumentException {
+
+        public CurrencyFormatException() {
+            super();
+        }
+
+        public CurrencyFormatException(String s) {
+            super(s);
+        }
+
+        static CurrencyFormatException forInputString(String s) {
+            return new CurrencyFormatException("For input string: \"" + s + "\"");
+        }
+
+    }
+
+
     private static String getClearInput(CharSequence text) {
         StringBuilder sb = new StringBuilder();
         for (int pos = 0; pos < text.length(); pos++) {
@@ -110,84 +127,88 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
         setValue(getValue());
     }
 
-
-    private String reformat(String text) {
+    private void setText(String text, int cursorPos) {
         StringBuilder sb = new StringBuilder();
-        int digitNum = 0;
-
-        boolean allowDecimalSeparator = text.indexOf('.') != -1;
+        boolean allowDecimalSeparator = true;
         char c;
-        label1:
-        for (int i = text.length(); i > 0; i--) {
+        int l = text.length();
+        if (cursorPos > l)
+            cursorPos = l;
+        if (cursorPos < 0)
+            cursorPos = 0;
+
+        int digitNum = 0, spaceNum = 0;
+        for (int i = l; i > 0; i--) {
             c = text.charAt(i-1);
             switch (c) {
                 case ' ':
+                    if (cursorPos >=i)
+                        cursorPos--;
                     break;
                 case '.':
-                    if (allowDecimalSeparator) {
-                        sb.append(c);
-                        allowDecimalSeparator = false;
-                        break;
-                    } else {
-                        break label1;
+                    if (!allowDecimalSeparator)
+                        throw CurrencyFormatException.forInputString(text);
+                    allowDecimalSeparator = false;
+
+                    for (int j = sb.length(); j > 0; j--) {
+                        if (sb.charAt(j-1) == ' ') {
+                            sb.delete(j-1, j);
+                        }
                     }
+                    spaceNum = 0;
+                    digitNum = 0;
+                    break;
                 case '0':case '1':case '2':case '3':case '4':
                 case '5':case '6':case '7':case '8':case '9':
-                    if (!allowDecimalSeparator) {
-                        digitNum++;
-                        if (digitNum > 3 && digitNum%3 == 1)
-                            sb.append(' ');
+                    digitNum++;
+                    if (digitNum > 3 && digitNum%3 == 1) {
+                        sb.append(' ');
+                        if (cursorPos > i) {
+                            spaceNum++;
+                        }
                     }
-                    sb.append(c);
                     break;
                 default:
-                    break label1;
+                    throw CurrencyFormatException.forInputString(text);
             }
+            if (c != ' ')
+                sb.append(c);
+
         }
+        cursorPos += spaceNum;
         sb.reverse();
-        return sb.toString();
+        setText(sb.toString());
+        setCursorPos(cursorPos);
     }
 
 
     @Override
     public void onKeyPress(KeyPressEvent event) {
-        char c = event.getCharCode();
-        if (Character.isDigit(c) || c =='.') {
-            String text = getText();
-            StringBuilder sb = new StringBuilder();
-            int pos = getCursorPos();
-            if (text != null && !text.isEmpty()) {
-                sb.append(text, 0, pos);
-                sb.append(c);
-                sb.append(text, pos + getSelectionLength(), text.length());
-            } else {
-                if (c == '.') {
-                    sb.append("0");
-                    pos++;
+        try {
+            char c = event.getCharCode();
+            if (Character.isDigit(c) || c == '.') {
+                String text = getText();
+                StringBuilder sb = new StringBuilder();
+                int pos = getCursorPos();
+                if (text != null && !text.isEmpty()) {
+                    sb.append(text, 0, pos);
+                    sb.append(c);
+                    sb.append(text, pos + getSelectionLength(), text.length());
+                } else {
+                    if (c == '.') {
+                        sb.append("0");
+                        pos++;
+                    }
+                    sb.append(c);
                 }
-                sb.append(c);
+                setText(sb.toString(), pos + 1);
             }
-            text = sb.toString();
-            String s = text.substring(0, pos+1);
-            text = reformat(text);
-            setText(text);
-
-            for (int j = 0, i = 0; i <s.length(); i++) {
-                if (s.charAt(i) == ' ')
-                    continue;
-                while (text.charAt(j) == ' ') {
-                    j++;
-                }
-                /* Исключительная ситуация, идем в конец форматированной строки */
-                if (s.charAt(i) != text.charAt(j)) {
-                    pos = text.length();
-                    break;
-                }
-                pos = ++j;
-            }
-            setCursorPos(pos);
+        } catch (CurrencyFormatException e) {
+            //ToDo fire event InvalidInput
+        } finally {
+            cancelKey();
         }
-        cancelKey();
+
     }
 
     @Override
@@ -245,6 +266,9 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
                     }
                 }
                 break;
+            default:
+                break;
         }
+
     }
 }
