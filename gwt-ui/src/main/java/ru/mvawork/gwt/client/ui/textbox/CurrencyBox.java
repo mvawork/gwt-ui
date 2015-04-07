@@ -4,30 +4,38 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.text.shared.Parser;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.ValueBox;
+import ru.mvawork.gwt.client.ui.events.CurrencyFormatErrorEvent;
+import ru.mvawork.gwt.client.ui.events.CurrencyFormatErrorEvent.CurrencyFormatErrorHandler;
+import ru.mvawork.gwt.client.ui.events.CurrencyFormatErrorEvent.HasCurrencyFormatErrorHandler;
+import ru.mvawork.gwt.client.ui.events.CurrencyValueChangeEvent;
+import ru.mvawork.gwt.client.ui.events.CurrencyValueChangeEvent.CurrencyValueChangeHandler;
+import ru.mvawork.gwt.client.ui.events.CurrencyValueChangeEvent.HasCurrencyValueChangeHandler;
 import ru.mvawork.gwt.client.ui.exception.CurrencyFormatException;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.logging.Logger;
 
-public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, KeyPressHandler, KeyDownHandler {
+public class CurrencyBox extends ValueBox<BigDecimal> implements KeyPressHandler, KeyDownHandler,
+        HasCurrencyFormatErrorHandler, HasCurrencyValueChangeHandler {
 
     private static final Logger log = Logger.getLogger(CurrencyBox.class.getName());
 
-    private static String getClearInput(CharSequence text) {
-        StringBuilder sb = new StringBuilder();
-        for (int pos = 0; pos < text.length(); pos++) {
-            Character c = text.charAt(pos);
-            if (c != ' ')
-                sb.append(c);
-        }
-        return sb.toString();
+
+    @Override
+    public HandlerRegistration addCurrencyFormatErrorHandler(CurrencyFormatErrorHandler handler) {
+        return addHandler(handler, CurrencyFormatErrorEvent.getType());
     }
 
+    @Override
+    public HandlerRegistration addCurrencyValueChangeHandler(CurrencyValueChangeHandler handler) {
+        return addHandler(handler, CurrencyValueChangeEvent.getType());
+    }
 
     private static class MoneyRender extends AbstractRenderer<BigDecimal> {
         @Override
@@ -40,14 +48,20 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
 
     private static class MoneyParser implements Parser<BigDecimal> {
 
+        private String getClearInput(CharSequence text) {
+            StringBuilder sb = new StringBuilder();
+            for (int pos = 0; pos < text.length(); pos++) {
+                Character c = text.charAt(pos);
+                if (c != ' ')
+                    sb.append(c);
+            }
+            return sb.toString();
+        }
+
         @Override
         public BigDecimal parse(CharSequence text) throws ParseException {
             try {
-                if (text == null)
-                    return null;
-                BigDecimal decimal = new BigDecimal(getClearInput(text));
-                decimal.setScale(2,  BigDecimal.ROUND_HALF_UP);
-                return decimal;
+                return text == null ? null : new BigDecimal(getClearInput(text)).setScale(2, BigDecimal.ROUND_HALF_UP);
             } catch (NumberFormatException e) {
                 return null;
             }
@@ -59,10 +73,9 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
 
     public CurrencyBox() {
         super(Document.get().createTextInputElement(), moneyRender, moneyParser);
-        addDomHandler(this, ChangeEvent.getType());
         addDomHandler(this, KeyPressEvent.getType());
         addDomHandler(this, KeyDownEvent.getType());
-        sinkEvents(Event.ONPASTE);
+        sinkEvents(Event.ONPASTE | Event.FOCUSEVENTS);
     }
 
     @Override
@@ -75,20 +88,14 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
                 Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                     @Override
                     public void execute() {
-
-
                         String s = getText();
-
                         if (!s.isEmpty()) {
                             int pos;
-                            log.fine(String.valueOf(prevPos));
                             if (text.length() >= s.length()) {
                                 pos = s.length();
                             } else {
                                 pos = prevPos + s.length() - text.length();
                             }
-                            log.fine(s);
-                            log.fine(String.valueOf(pos));
                             if (!trySetText(s, pos)) {
                                 setText(text);
                                 setCursorPos(prevPos);
@@ -99,15 +106,9 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
                 break;
             case Event.ONBLUR:
                 setValue(getValue());
+                fireEvent(new CurrencyValueChangeEvent(getText()));
                 break;
-
         }
-    }
-
-
-    @Override
-    public void onChange(ChangeEvent event) {
-        setValue(getValue());
     }
 
     private static class ParsedText {
@@ -132,6 +133,7 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
                 c = text.charAt(i-1);
                 switch (c) {
                     case ' ':
+                    case '\r':
                         if (cursorPos >=i)
                             cursorPos--;
                         break;
@@ -186,38 +188,38 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
             ParsedText parsedText = new ParsedText(text, cursorPos);
             setText(parsedText.getText());
             setCursorPos(parsedText.getCursorPos());
+            fireEvent(new CurrencyValueChangeEvent(text));
             return true;
         } catch (CurrencyFormatException e) {
-            //ToDo fire event InvalidInput
+            fireEvent(new CurrencyFormatErrorEvent(text));
             return false;
         }
     }
 
     @Override
     public void onKeyPress(KeyPressEvent event) {
-
         char c = event.getCharCode();
-
-        if (Character.isDigit(c) || c == '.') {
-            String text = getText();
-            StringBuilder sb = new StringBuilder();
-            int pos = getCursorPos();
-            if (text != null && !text.isEmpty()) {
-                sb.append(text, 0, pos);
-                sb.append(c);
-                sb.append(text, pos + getSelectionLength(), text.length());
-            } else {
-                if (c == '.') {
-                    sb.append("0");
-                    pos++;
+        if (c != 0) {
+            try {
+                String text = getText();
+                StringBuilder sb = new StringBuilder();
+                int pos = getCursorPos();
+                if (text != null && !text.isEmpty()) {
+                    sb.append(text, 0, pos);
+                    sb.append(c);
+                    sb.append(text, pos + getSelectionLength(), text.length());
+                } else {
+                    if (c == '.') {
+                        sb.append("0");
+                        pos++;
+                    }
+                    sb.append(c);
                 }
-                sb.append(c);
+                trySetText(sb.toString(), pos + 1);
+            } finally {
+                cancelKey();
             }
-            trySetText(sb.toString(), pos + 1);
         }
-        if (c != 0)
-            cancelKey();
-
     }
 
     @Override
@@ -225,7 +227,7 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
         StringBuilder sb = new StringBuilder();
         NativeEvent ne = event.getNativeEvent();
         final String text = getText();
-        final int prevPos = getCursorPos();;
+        final int prevPos = getCursorPos();
         switch (event.getNativeKeyCode()) {
             case KeyCodes.KEY_Z:
             case KeyCodes.KEY_Y:
@@ -277,6 +279,8 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements ChangeHandler, 
                                 pos--;
                             sb.append(text, 0, pos - 1);
                             sb.append(text, pos, l);
+                        } else {
+                            break;
                         }
                     }
                     trySetText(sb.toString(), pos - 1);

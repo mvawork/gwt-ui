@@ -9,6 +9,8 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import ru.mvawork.gwt.client.ui.events.BarValueChangeEvent;
+import ru.mvawork.gwt.client.ui.events.CurrencyFormatErrorEvent;
+import ru.mvawork.gwt.client.ui.events.CurrencyValueChangeEvent;
 import ru.mvawork.gwt.client.ui.sliders.HorizontalSliderBar;
 import ru.mvawork.gwt.client.ui.textbox.CurrencyBox;
 
@@ -54,6 +56,7 @@ public class MainEntryPoint implements EntryPoint {
 
         sliderBar.setSelectedIndex(srokList.size() - 1);
 
+        HorizontalPanel horizontalPanel = new HorizontalPanel();
         CurrencyBox moneyInputBox = new CurrencyBox();
         moneyInputBox.addValueChangeHandler(new ValueChangeHandler<BigDecimal>() {
             @Override
@@ -61,14 +64,23 @@ public class MainEntryPoint implements EntryPoint {
                 Window.alert(event.getValue().toString());
             }
         });
-        RootPanel.get().add(moneyInputBox);
+        horizontalPanel.add(moneyInputBox);
+        final Label moneyErrorLabel = new Label();
+        horizontalPanel.add(moneyErrorLabel);
 
-        moneyInputBox.setValue(new BigDecimal(10000.22));
-
-        IntegerBox nn = new IntegerBox();
-        nn.setValue(1999);
-        RootPanel.get().add(nn);
-
+        moneyInputBox.addCurrencyFormatErrorHandler(new CurrencyFormatErrorEvent.CurrencyFormatErrorHandler() {
+            @Override
+            public void onCurrencyFormatError(CurrencyFormatErrorEvent event) {
+                moneyErrorLabel.setText("Ошибка ввода");
+            }
+        });
+        moneyInputBox.addCurrencyValueChangeHandler(new CurrencyValueChangeEvent.CurrencyValueChangeHandler() {
+            @Override
+            public void onCurrencyValueChange(CurrencyValueChangeEvent event) {
+                moneyErrorLabel.setText(null);
+            }
+        });
+        RootPanel.get().add(horizontalPanel);
     }
 
 }

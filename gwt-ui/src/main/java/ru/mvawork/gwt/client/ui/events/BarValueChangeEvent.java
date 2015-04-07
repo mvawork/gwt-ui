@@ -15,7 +15,7 @@ public class BarValueChangeEvent extends GwtEvent<BarValueChangeEvent.BarValueCh
         HandlerRegistration addBarValueChangeHandler(BarValueChangeHandler handler);
     }
 
-    public static Type<BarValueChangeHandler> type = new Type<>();
+    private static Type<BarValueChangeHandler> type = new Type<>();
 
     public static Type<BarValueChangeHandler> getType() {
         return type;

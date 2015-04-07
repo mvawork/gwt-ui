@@ -13,10 +13,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
 import ru.mvawork.gwt.client.ui.events.BarValueChangeEvent;
+import ru.mvawork.gwt.client.ui.events.BarValueChangeEvent.HasBarValueChangeHandler;
 
 import java.util.ArrayList;
 
-public abstract class HorizontalSliderBar<T> extends Composite implements BarValueChangeEvent.HasBarValueChangeHandler {
+public abstract class HorizontalSliderBar<T> extends Composite implements HasBarValueChangeHandler {
 
 
     public interface Style extends CssResource {
