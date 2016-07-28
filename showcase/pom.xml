@@ -4,11 +4,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-
-    <groupId>ru.mvawork</groupId>
-    <artifactId>gwt-ui</artifactId>
+    <groupId>ru.mvawork.gwt</groupId>
+    <artifactId>showcase</artifactId>
     <version>1.0</version>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
 
     <properties>
         <gwtVersion>2.7.0</gwtVersion>
@@ -24,28 +23,41 @@
             <version>${gwtVersion}</version>
             <scope>provided</scope>
         </dependency>
+	<dependency>
+	    <groupId>ru.mvawork.gwt</groupId>
+	    <artifactId>widgets</artifactId>
+	    <version>1.0</version>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
-                <version>${gwtVersion}</version>
+                <version>2.7.0</version>
                 <executions>
                     <execution>
+                        <configuration>
+                            <module>ru.mvawork.gwt.UI</module>
+                        </configuration>
                         <goals>
-                            <goal>resources</goal>
+                            <goal>compile</goal>
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <modules>
-                        <module>ru.mvawork.gwt.UI</module>
-                    </modules>
-                </configuration>
             </plugin>
         </plugins>
     </build>
-    
+
 </project>

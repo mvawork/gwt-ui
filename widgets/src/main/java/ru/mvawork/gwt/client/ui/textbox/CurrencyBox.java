@@ -85,7 +85,7 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements KeyPressHandler
             case Event.ONPASTE:
                 final String text = getText();
                 final int prevPos = getCursorPos();
-                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
                     @Override
                     public void execute() {
                         String s = getText();

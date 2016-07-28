@@ -7,12 +7,16 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.RootPanel;
 import ru.mvawork.gwt.client.ui.events.BarValueChangeEvent;
 import ru.mvawork.gwt.client.ui.events.CurrencyFormatErrorEvent;
 import ru.mvawork.gwt.client.ui.events.CurrencyValueChangeEvent;
 import ru.mvawork.gwt.client.ui.sliders.HorizontalSliderBar;
 import ru.mvawork.gwt.client.ui.textbox.CurrencyBox;
+import ru.mvawork.gwt.client.ui.textbox.DateBox;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -81,6 +85,13 @@ public class MainEntryPoint implements EntryPoint {
             }
         });
         RootPanel.get().add(horizontalPanel);
+        //
+        HorizontalPanel dateTestPanel = new HorizontalPanel();
+        DateBox dateBox = new DateBox();
+        dateTestPanel.add(dateBox);
+        RootPanel.get().add(dateTestPanel);
+
+
     }
 
 }
