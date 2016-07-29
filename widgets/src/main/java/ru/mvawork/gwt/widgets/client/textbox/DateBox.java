@@ -55,7 +55,7 @@ public class DateBox extends ValueBox<Date> implements KeyPressHandler, KeyDownH
     private static DateParser dateParser = new DateParser();
 
     public DateBox() {
-        super(Document.get().createTextInputElement(), dateRender, new DateParser());
+        super(Document.get().createTextInputElement(), dateRender, dateParser);
         addDomHandler(this, KeyPressEvent.getType());
         addDomHandler(this, KeyDownEvent.getType());
         sinkEvents(Event.ONPASTE | Event.FOCUSEVENTS);

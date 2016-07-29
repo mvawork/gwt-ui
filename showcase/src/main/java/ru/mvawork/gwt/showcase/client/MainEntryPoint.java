@@ -15,6 +15,7 @@ import ru.mvawork.gwt.widgets.client.events.*;
 import ru.mvawork.gwt.widgets.client.sliders.HorizontalSliderBar;
 import ru.mvawork.gwt.widgets.client.textbox.CurrencyBox;
 import ru.mvawork.gwt.widgets.client.textbox.DateBox;
+import ru.mvawork.gwt.widgets.client.textbox.PhoneBox;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -102,9 +103,33 @@ public class MainEntryPoint implements EntryPoint {
                 dateErrorLabel.setText("Ок");
             }
         });
-
-
         RootPanel.get().add(dateTestPanel);
+
+        // Телефон
+        HorizontalPanel phoneTestPanel = new HorizontalPanel();
+        final PhoneBox phoneBox = new PhoneBox();
+        phoneTestPanel.add(phoneBox);
+        final Label phoneErrorLabel = new Label();
+        phoneTestPanel.add(phoneErrorLabel);
+/*
+        dateBox.addDateFormatErrorHandler(new DateFormatErrorEvent.DateFormatErrorHandler() {
+            @Override
+            public void onDateFormatError(DateFormatErrorEvent event) {
+                dateErrorLabel.setText("Неверная дата: " + event.getText());
+            }
+        });
+
+        dateBox.addDateValueChangeHandler(new DateValueChangeEvent.DateValueChangeHandler() {
+            @Override
+            public void onDateValueChange(DateValueChangeEvent event) {
+                dateErrorLabel.setText("Ок");
+            }
+        });
+*/
+
+
+        RootPanel.get().add(phoneTestPanel);
+
 
 
     }
