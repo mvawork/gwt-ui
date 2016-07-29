@@ -1,4 +1,4 @@
-package ru.mvawork.gwt.client.ui.textbox;
+package ru.mvawork.gwt.client.widgets.textbox;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
@@ -9,13 +9,13 @@ import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.text.shared.Parser;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.ValueBox;
-import ru.mvawork.gwt.client.ui.events.CurrencyFormatErrorEvent;
-import ru.mvawork.gwt.client.ui.events.CurrencyFormatErrorEvent.CurrencyFormatErrorHandler;
-import ru.mvawork.gwt.client.ui.events.CurrencyFormatErrorEvent.HasCurrencyFormatErrorHandler;
-import ru.mvawork.gwt.client.ui.events.CurrencyValueChangeEvent;
-import ru.mvawork.gwt.client.ui.events.CurrencyValueChangeEvent.CurrencyValueChangeHandler;
-import ru.mvawork.gwt.client.ui.events.CurrencyValueChangeEvent.HasCurrencyValueChangeHandler;
-import ru.mvawork.gwt.client.ui.exception.CurrencyFormatException;
+import ru.mvawork.gwt.client.widgets.events.CurrencyFormatErrorEvent;
+import ru.mvawork.gwt.client.widgets.events.CurrencyFormatErrorEvent.CurrencyFormatErrorHandler;
+import ru.mvawork.gwt.client.widgets.events.CurrencyFormatErrorEvent.HasCurrencyFormatErrorHandler;
+import ru.mvawork.gwt.client.widgets.events.CurrencyValueChangeEvent;
+import ru.mvawork.gwt.client.widgets.events.CurrencyValueChangeEvent.CurrencyValueChangeHandler;
+import ru.mvawork.gwt.client.widgets.events.CurrencyValueChangeEvent.HasCurrencyValueChangeHandler;
+import ru.mvawork.gwt.client.widgets.exception.CurrencyFormatException;
 
 import java.math.BigDecimal;
 import java.text.ParseException;

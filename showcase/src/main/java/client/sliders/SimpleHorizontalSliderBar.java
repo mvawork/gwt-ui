@@ -3,7 +3,7 @@ package client.sliders;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
-import ru.mvawork.gwt.client.ui.sliders.HorizontalSliderBar;
+import ru.mvawork.gwt.client.widgets.sliders.HorizontalSliderBar;
 
 public class SimpleHorizontalSliderBar extends HorizontalSliderBar<Integer> {
 

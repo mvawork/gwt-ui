@@ -11,10 +11,10 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
-import ru.mvawork.gwt.client.ui.events.*;
-import ru.mvawork.gwt.client.ui.sliders.HorizontalSliderBar;
-import ru.mvawork.gwt.client.ui.textbox.CurrencyBox;
-import ru.mvawork.gwt.client.ui.textbox.DateBox;
+import ru.mvawork.gwt.client.widgets.events.*;
+import ru.mvawork.gwt.client.widgets.sliders.HorizontalSliderBar;
+import ru.mvawork.gwt.client.widgets.textbox.CurrencyBox;
+import ru.mvawork.gwt.client.widgets.textbox.DateBox;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

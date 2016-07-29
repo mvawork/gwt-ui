@@ -27,6 +27,16 @@
     </dependencies>
 
     <build>
+
+        <resources>
+            <resource>
+                <directory>src/main/java/</directory>
+                <includes>
+                    <include>**/*.java</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -45,7 +55,7 @@
                 <executions>
                     <execution>
                         <configuration>
-                            <module>ru.mvawork.gwt.UI</module>
+                            <module>ru.mvawork.gwt.client.Widgets</module>
                         </configuration>
                         <goals>
                             <goal>compile</goal>

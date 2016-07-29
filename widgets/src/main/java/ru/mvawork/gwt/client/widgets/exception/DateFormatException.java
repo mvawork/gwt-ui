@@ -1,4 +1,4 @@
-package ru.mvawork.gwt.client.ui.exception;
+package ru.mvawork.gwt.client.widgets.exception;
 
 public class DateFormatException extends IllegalArgumentException {
 
