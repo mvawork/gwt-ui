@@ -1,0 +1,53 @@
+@charset "UTF-8";
+@def SCALE_HEIGHT 8px;
+
+.slider {
+    background-color: aqua;
+    overflow: hidden;
+
+}
+
+.scale {
+    background: none repeat scroll 0 0 #B1B9BE;
+    color: #333;
+    height: SCALE_HEIGHT;
+    cursor: pointer;
+    border-radius: SCALE_HEIGHT;
+}
+
+@sprite .drag {
+    gwt-image: "polzunok";
+    display: block;
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    z-index: 100;
+}
+
+.progress {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    height: SCALE_HEIGHT;
+    background-color: cornflowerblue;
+}
+
+.marks {
+    height: 25px;
+}
+.markTic {
+    display: block;
+    background-color: black;
+    width: 1px;
+    height: 10px;
+}
+
+.markLabel {
+    font-size: 10px;
+    font-weight: normal;
+    font-style: normal;
+    color: #595D5F;
+}
+

@@ -1,4 +1,4 @@
-package ru.mvawork.gwt.client.widgets.textbox;
+package ru.mvawork.gwt.widgets.client.textbox;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
@@ -9,8 +9,8 @@ import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.text.shared.Parser;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.ValueBox;
-import ru.mvawork.gwt.client.widgets.events.DateFormatErrorEvent;
-import ru.mvawork.gwt.client.widgets.events.DateValueChangeEvent;
+import ru.mvawork.gwt.widgets.client.events.DateFormatErrorEvent;
+import ru.mvawork.gwt.widgets.client.events.DateValueChangeEvent;
 
 import java.text.ParseException;
 import java.util.Date;

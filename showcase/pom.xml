@@ -49,7 +49,7 @@
                 <executions>
                     <execution>
                         <configuration>
-                            <module>ru.mvawork.gwt.UI</module>
+                            <module>ru.mvawork.gwt.showcase.ShowCase</module>
                         </configuration>
                         <goals>
                             <goal>compile</goal>

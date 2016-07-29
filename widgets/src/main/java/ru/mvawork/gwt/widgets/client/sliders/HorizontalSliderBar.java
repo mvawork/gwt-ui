@@ -1,4 +1,4 @@
-package ru.mvawork.gwt.client.widgets.sliders;
+package ru.mvawork.gwt.widgets.client.sliders;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -12,8 +12,8 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
-import ru.mvawork.gwt.client.widgets.events.BarValueChangeEvent;
-import ru.mvawork.gwt.client.widgets.events.BarValueChangeEvent.HasBarValueChangeHandler;
+import ru.mvawork.gwt.widgets.client.events.BarValueChangeEvent;
+import ru.mvawork.gwt.widgets.client.events.BarValueChangeEvent.HasBarValueChangeHandler;
 
 import java.util.ArrayList;
 

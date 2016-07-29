@@ -1,4 +1,4 @@
-package ru.mvawork.gwt.client.widgets.textbox;
+package ru.mvawork.gwt.widgets.client.textbox;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
@@ -9,20 +9,18 @@ import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.text.shared.Parser;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.ValueBox;
-import ru.mvawork.gwt.client.widgets.events.CurrencyFormatErrorEvent;
-import ru.mvawork.gwt.client.widgets.events.CurrencyFormatErrorEvent.CurrencyFormatErrorHandler;
-import ru.mvawork.gwt.client.widgets.events.CurrencyFormatErrorEvent.HasCurrencyFormatErrorHandler;
-import ru.mvawork.gwt.client.widgets.events.CurrencyValueChangeEvent;
-import ru.mvawork.gwt.client.widgets.events.CurrencyValueChangeEvent.CurrencyValueChangeHandler;
-import ru.mvawork.gwt.client.widgets.events.CurrencyValueChangeEvent.HasCurrencyValueChangeHandler;
-import ru.mvawork.gwt.client.widgets.exception.CurrencyFormatException;
+import ru.mvawork.gwt.widgets.client.events.CurrencyFormatErrorEvent;
+import ru.mvawork.gwt.widgets.client.events.CurrencyFormatErrorEvent.CurrencyFormatErrorHandler;
+import ru.mvawork.gwt.widgets.client.events.CurrencyFormatErrorEvent.HasCurrencyFormatErrorHandler;
+import ru.mvawork.gwt.widgets.client.events.CurrencyValueChangeEvent;
+import ru.mvawork.gwt.widgets.client.exception.CurrencyFormatException;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.logging.Logger;
 
 public class CurrencyBox extends ValueBox<BigDecimal> implements KeyPressHandler, KeyDownHandler,
-        HasCurrencyFormatErrorHandler, HasCurrencyValueChangeHandler {
+        HasCurrencyFormatErrorHandler, CurrencyValueChangeEvent.HasCurrencyValueChangeHandler {
 
     private static final Logger log = Logger.getLogger(CurrencyBox.class.getName());
 
@@ -33,7 +31,7 @@ public class CurrencyBox extends ValueBox<BigDecimal> implements KeyPressHandler
     }
 
     @Override
-    public HandlerRegistration addCurrencyValueChangeHandler(CurrencyValueChangeHandler handler) {
+    public HandlerRegistration addCurrencyValueChangeHandler(CurrencyValueChangeEvent.CurrencyValueChangeHandler handler) {
         return addHandler(handler, CurrencyValueChangeEvent.getType());
     }
 

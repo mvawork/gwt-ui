@@ -32,6 +32,7 @@
             <resource>
                 <directory>src/main/java/</directory>
                 <includes>
+                    <include>**/*.gwt.xml</include>
                     <include>**/*.java</include>
                 </includes>
             </resource>
@@ -55,7 +56,7 @@
                 <executions>
                     <execution>
                         <configuration>
-                            <module>ru.mvawork.gwt.client.Widgets</module>
+                            <module>ru.mvawork.gwt.widgets.Widgets</module>
                         </configuration>
                         <goals>
                             <goal>compile</goal>

@@ -1,4 +1,4 @@
-package ru.mvawork.gwt.client.widgets.events;
+package ru.mvawork.gwt.widgets.client.events;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;

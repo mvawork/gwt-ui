@@ -1,9 +1,9 @@
-package ru.mvawork.gwt.client.widgets.events;
+package ru.mvawork.gwt.widgets.client.events;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
-import ru.mvawork.gwt.client.widgets.events.CurrencyFormatErrorEvent.CurrencyFormatErrorHandler;
+import ru.mvawork.gwt.widgets.client.events.CurrencyFormatErrorEvent.CurrencyFormatErrorHandler;
 
 public class CurrencyFormatErrorEvent extends GwtEvent<CurrencyFormatErrorHandler> {
 
