@@ -3,43 +3,59 @@ package ru.mvawork.gwt.client.ui.textbox;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.text.shared.Parser;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.ValueBox;
+import ru.mvawork.gwt.client.ui.events.DateFormatErrorEvent;
 import ru.mvawork.gwt.client.ui.events.DateValueChangeEvent;
 
 import java.text.ParseException;
 import java.util.Date;
 
-public class DateBox extends ValueBox<Date> implements KeyPressHandler, KeyDownHandler {
+public class DateBox extends ValueBox<Date> implements KeyPressHandler, KeyDownHandler,
+        DateFormatErrorEvent.HasDateFormatErrorHandler, DateValueChangeEvent.HasDateValueChangeHandler {
 
-    static final private DateTimeFormat df = DateTimeFormat.getFormat("dd.MM.yyyy");
+    static final private DateTimeFormat df = DateTimeFormat.getFormat("ddMMyyyy");
     static final private String dateMask = "__.__.____";
     static final private int dateMaskLengh = dateMask.length();
+
+    @Override
+    public HandlerRegistration addDateFormatErrorHandler(DateFormatErrorEvent.DateFormatErrorHandler handler) {
+        return addHandler(handler, DateFormatErrorEvent.getType());
+    }
+
+    @Override
+    public HandlerRegistration addDateValueChangeHandler(DateValueChangeEvent.DateValueChangeHandler handler) {
+        return addHandler(handler, DateValueChangeEvent.getType());
+    }
 
     private static class DateRender extends AbstractRenderer<Date> {
         @Override
         public String render(Date object) {
             if (object == null)
                 return null;
-            return df.format(object);
+            return applyMask(df.format(object), false);
         }
     }
 
     private static class DateParser implements Parser<Date> {
         @Override
         public Date parse(CharSequence text) throws ParseException {
-            return (text == null || text.length() == 0 || dateMask.equals(text)) ? null : df.parse(text.toString());
+            String unmaskedText = clearMask(text.toString());
+            if (unmaskedText.length() == 0)
+                return null;
+            return df.parse(unmaskedText);
         }
     }
 
-    private static DateRender moneyRender = new DateRender();
-    private static DateParser moneyParser = new DateParser();
+    private static DateRender dateRender = new DateRender();
+    private static DateParser dateParser = new DateParser();
 
     public DateBox() {
-        super(Document.get().createTextInputElement(), moneyRender, moneyParser);
+        super(Document.get().createTextInputElement(), dateRender, new DateParser());
         addDomHandler(this, KeyPressEvent.getType());
         addDomHandler(this, KeyDownEvent.getType());
         sinkEvents(Event.ONPASTE | Event.FOCUSEVENTS);
@@ -50,45 +66,52 @@ public class DateBox extends ValueBox<Date> implements KeyPressHandler, KeyDownH
         super.onBrowserEvent(event);
         switch (event.getTypeInt()) {
             case Event.ONPASTE:
-                String text = getText();
-                final String ut = clearMask(text);
-                final int pp = getTextPos(text, getCursorPos());
-                Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
+                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                     @Override
                     public void execute() {
-/*
-                        String s = getText();
-                        if (!s.isEmpty()) {
-                            int pos;
-                            if (text.length() >= s.length()) {
-                                pos = s.length();
-                            } else {
-                                pos = prevPos + s.length() - text.length();
+                        String text = getText();
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < text.length(); i++) {
+                            char c = text.charAt(i);
+                            switch (c) {
+                                case '0':
+                                case '1':
+                                case '2':
+                                case '3':
+                                case '4':
+                                case '5':
+                                case '6':
+                                case '7':
+                                case '8':
+                                case '9':
+                                    sb.append(c);
+                                    break;
                             }
-                            if (!trySetText(s, pos)) {
-                                setText(text);
-                                setCursorPos(prevPos);
-                            }
-*/
                         }
+                        setText(applyMask(sb.toString(), false));
+                    }
                 });
                 break;
             case Event.ONFOCUS:
                 String s = getText();
                 if (s == null || s.isEmpty()) {
                     setText(dateMask);
-                    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                    Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
                         @Override
                         public void execute() {
                             setCursorPos(0);
                         }
                     });
                 }
-
                 break;
             case Event.ONBLUR:
-                setValue(getValue());
-                fireEvent(new DateValueChangeEvent(getText()));
+                try {
+                    Date d = getValue();
+                    setValue(d);
+                    fireEvent(new DateValueChangeEvent(d));
+                } catch (Exception e) {
+                    fireEvent(new DateFormatErrorEvent(getText()));
+                }
                 break;
         }
     }
@@ -112,7 +135,7 @@ public class DateBox extends ValueBox<Date> implements KeyPressHandler, KeyDownH
         return sb.toString().trim();
     }
 
-    private String applyMask(String text, boolean trimMask) {
+    private static String applyMask(String text, boolean trimMask) {
         StringBuilder sb = new StringBuilder();
         int pos = 0;
         int len = text.length();
@@ -188,14 +211,16 @@ public class DateBox extends ValueBox<Date> implements KeyPressHandler, KeyDownH
         final String text = getText();
         final int prevPos = getCursorPos();
         switch (event.getNativeKeyCode()) {
+            case KeyCodes.KEY_Z:
+            case KeyCodes.KEY_Y:
+                cancelKey();
+                break;
             case KeyCodes.KEY_DELETE:
                 if (text != null && !text.isEmpty()) {
                     int l = text.length();
                     if (prevPos < l) {
-                        /* Получить текст без маски */
                         String ut = clearMask(text);
                         int ul = ut.length();
-                        /* Позиция курсора в тексте */
                         int n1 = getTextPos(text, prevPos);
                         sb.append(ut, 0, n1);
                         int s = getSelectionLength();

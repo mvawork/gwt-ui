@@ -11,9 +11,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
-import ru.mvawork.gwt.client.ui.events.BarValueChangeEvent;
-import ru.mvawork.gwt.client.ui.events.CurrencyFormatErrorEvent;
-import ru.mvawork.gwt.client.ui.events.CurrencyValueChangeEvent;
+import ru.mvawork.gwt.client.ui.events.*;
 import ru.mvawork.gwt.client.ui.sliders.HorizontalSliderBar;
 import ru.mvawork.gwt.client.ui.textbox.CurrencyBox;
 import ru.mvawork.gwt.client.ui.textbox.DateBox;
@@ -87,8 +85,25 @@ public class MainEntryPoint implements EntryPoint {
         RootPanel.get().add(horizontalPanel);
         //
         HorizontalPanel dateTestPanel = new HorizontalPanel();
-        DateBox dateBox = new DateBox();
+        final DateBox dateBox = new DateBox();
         dateTestPanel.add(dateBox);
+        final Label dateErrorLabel = new Label();
+        dateTestPanel.add(dateErrorLabel);
+        dateBox.addDateFormatErrorHandler(new DateFormatErrorEvent.DateFormatErrorHandler() {
+            @Override
+            public void onDateFormatError(DateFormatErrorEvent event) {
+                dateErrorLabel.setText("Неверная дата: " + event.getText());
+            }
+        });
+
+        dateBox.addDateValueChangeHandler(new DateValueChangeEvent.DateValueChangeHandler() {
+            @Override
+            public void onDateValueChange(DateValueChangeEvent event) {
+                dateErrorLabel.setText("Ок");
+            }
+        });
+
+
         RootPanel.get().add(dateTestPanel);
 
 

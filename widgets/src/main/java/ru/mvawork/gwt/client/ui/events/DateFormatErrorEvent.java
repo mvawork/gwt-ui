@@ -10,8 +10,8 @@ public class DateFormatErrorEvent extends GwtEvent<DateFormatErrorEvent.DateForm
         public void onDateFormatError(DateFormatErrorEvent event);
     }
 
-    public interface HasCurrencyFormatErrorHandler {
-        HandlerRegistration addCurrencyFormatErrorHandler(DateFormatErrorHandler handler);
+    public interface HasDateFormatErrorHandler {
+        HandlerRegistration addDateFormatErrorHandler(DateFormatErrorHandler handler);
     }
 
     private static Type<DateFormatErrorHandler> type = new Type<>();
