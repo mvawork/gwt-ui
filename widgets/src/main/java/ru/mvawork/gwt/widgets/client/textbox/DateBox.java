@@ -58,7 +58,7 @@ public class DateBox extends ValueBox<Date> implements KeyPressHandler, KeyDownH
         super(Document.get().createTextInputElement(), dateRender, dateParser);
         addDomHandler(this, KeyPressEvent.getType());
         addDomHandler(this, KeyDownEvent.getType());
-        sinkEvents(Event.ONPASTE | Event.FOCUSEVENTS);
+        sinkEvents(Event.ONPASTE | Event.FOCUSEVENTS | Event.MOUSEEVENTS);
     }
 
     @Override
@@ -73,20 +73,8 @@ public class DateBox extends ValueBox<Date> implements KeyPressHandler, KeyDownH
                         StringBuilder sb = new StringBuilder();
                         for (int i = 0; i < text.length(); i++) {
                             char c = text.charAt(i);
-                            switch (c) {
-                                case '0':
-                                case '1':
-                                case '2':
-                                case '3':
-                                case '4':
-                                case '5':
-                                case '6':
-                                case '7':
-                                case '8':
-                                case '9':
-                                    sb.append(c);
-                                    break;
-                            }
+                            if (Character.isDigit(c))
+                                sb.append(c);
                         }
                         setText(applyMask(sb.toString(), false));
                     }
@@ -113,26 +101,35 @@ public class DateBox extends ValueBox<Date> implements KeyPressHandler, KeyDownH
                     fireEvent(new DateFormatErrorEvent(getText()));
                 }
                 break;
+            case Event.ONMOUSEDOWN:
+                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        int curPos = getCursorPos();
+                        String ut = clearMask(getText());
+                        if (ut != null) {
+                            int maxPos = getMaskPos(ut, ut.length());
+                            if (curPos > maxPos)
+                                curPos = maxPos;
+                        }
+                        if (curPos < 0)
+                            curPos = 0;
+                        setCursorPos(curPos);
+                    }
+                });
+                break;
+
         }
     }
 
-    private static String clearMask(String text) {
+    private static String clearMask(String maskedText) {
         StringBuilder sb = new StringBuilder();
-        int len = text.length();
-        if (len > dateMaskLengh)
-            len = dateMaskLengh;
-        for (int i = 0; i < len; i++) {
-            char c = dateMask.charAt(i);
-            char t = text.charAt(i);
-            switch (c) {
-                case '.':
-                    break;
-                default:
-                    sb.append(t == c ? ' ' : t);
-                    break;
-            }
+        for (int i = 0; i < maskedText.length(); i ++) {
+            char c = maskedText.charAt(i);
+            if (Character.isDigit(c))
+                sb.append(c);
         }
-        return sb.toString().trim();
+        return sb.toString();
     }
 
     private static String applyMask(String text, boolean trimMask) {
@@ -167,48 +164,32 @@ public class DateBox extends ValueBox<Date> implements KeyPressHandler, KeyDownH
     public void onKeyPress(KeyPressEvent event) {
         char c = event.getCharCode();
         if (c != 0) {
-            try {
-                switch (c) {
-                    case '0':
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
-                        int pos = getCursorPos();
-                        if (pos < dateMaskLengh) {
-                            final String text = getText();
-                            if (text.charAt(pos) == '.')
-                                pos++;
-                            StringBuilder sb = new StringBuilder();
-                            sb.append(text, 0, pos);
-                            sb.append(c);
-                            sb.append(text, pos + 1, dateMaskLengh);
-                            setText(sb.toString());
-                            final int fpos = pos + 1;
-                            Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
-                                @Override
-                                public void execute() {
-                                    setCursorPos(fpos + (text.charAt(fpos) == '.' ? 1 : 0));
-                                }
-                            });
-                        }
-                        break;
-                }
-            } finally {
-                cancelKey();
+            cancelKey();
+            if (Character.isDigit(c) && getSelectionLength() == 0) {
+                int pos = getCursorPos();
+                final String text = getText();
+                String value = clearMask(text);
+                final int n = getTextPos(text, pos);
+                StringBuilder sb = new StringBuilder();
+                sb.append(value, 0, n);
+                sb.append(c);
+                sb.append(value, n, value.length());
+                final String m = applyMask(sb.toString(), false);
+                setText(m);
+                Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        setCursorPos(getMaskPos(m, n+1));
+                    }
+                });
             }
         }
-     }
+    }
 
     @Override
     public void onKeyDown(KeyDownEvent event) {
         StringBuilder sb = new StringBuilder();
-        final String text = getText();
+        final String mt = getText();
         final int prevPos = getCursorPos();
         switch (event.getNativeKeyCode()) {
             case KeyCodes.KEY_Z:
@@ -216,38 +197,44 @@ public class DateBox extends ValueBox<Date> implements KeyPressHandler, KeyDownH
                 cancelKey();
                 break;
             case KeyCodes.KEY_DELETE:
-                if (text != null && !text.isEmpty()) {
-                    int l = text.length();
-                    if (prevPos < l) {
-                        String ut = clearMask(text);
-                        int ul = ut.length();
-                        int n1 = getTextPos(text, prevPos);
-                        sb.append(ut, 0, n1);
-                        int s = getSelectionLength();
-                        if (s == 0)
-                            sb.append(ut, n1 + 1, ul);
-                        else
-                            sb.append(ut, getTextPos(text, prevPos + s), l);
-                        setText(applyMask(sb.toString(), false));
-                        cancelKey();
-                        Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
-                            @Override
-                            public void execute() {
-                                setCursorPos(prevPos);
-                            }
-                        });
-                    }
+                int l = mt.length();
+                if (prevPos < l) {
+                    String ut = clearMask(mt);
+                    int ul = ut.length();
+                    int n1 = getTextPos(mt, prevPos);
+                    sb.append(ut, 0, n1);
+                    int s = getSelectionLength();
+                    if (s == 0)
+                        sb.append(ut, n1 + 1, ul);
+                    else
+                        sb.append(ut, getTextPos(mt, prevPos + s), l);
+                    setText(applyMask(sb.toString(), false));
+                    cancelKey();
+                    Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
+                        @Override
+                        public void execute() {
+                            setCursorPos(prevPos);
+                        }
+                    });
                 }
                 break;
             case KeyCodes.KEY_BACKSPACE:
-                if (text != null && !text.isEmpty()) {
-                    int s = getSelectionLength();
-                    final String ut = clearMask(text);
-                    int ul = ut.length();
-                    final int n1 = getTextPos(text, prevPos);
+                int s = getSelectionLength();
+                final String ut = clearMask(mt);
+                int ul = ut.length();
+                final int n1 = getTextPos(mt, prevPos);
+                final int maxPos = getMaskPos(ut, ut.length());
+                if (maxPos < prevPos) {
+                    Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
+                        @Override
+                        public void execute() {
+                            setCursorPos(maxPos);
+                        }
+                    });
+                } else {
                     if (s > 0) {
                         sb.append(ut, 0, n1);
-                        sb.append(ut, getTextPos(text, prevPos + s), ul);
+                        sb.append(ut, getTextPos(mt, prevPos + s), ul);
                         Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
                             @Override
                             public void execute() {
@@ -256,23 +243,28 @@ public class DateBox extends ValueBox<Date> implements KeyPressHandler, KeyDownH
                         });
                     } else {
                         if (n1 > 0) {
-                            getMaskPos(ut, n1-1);
-                            sb.append(ut, 0, n1-1);
+                            getMaskPos(ut, n1 - 1);
+                            sb.append(ut, 0, n1 - 1);
                             sb.append(ut, n1, ul);
                             Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
                                 @Override
                                 public void execute() {
-                                    setCursorPos(n1 - 1> 0 ? getMaskPos(ut, n1-1) : 0);
+                                    setCursorPos(n1 - 1 > 0 ? getMaskPos(ut, n1 - 1) : 0);
                                 }
                             });
+
                         } else {
-                            break;
+                            Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
+                                @Override
+                                public void execute() {
+                                    setCursorPos(0);
+                                }
+                            });
                         }
                     }
                     setText(applyMask(sb.toString(), false));
-                    cancelKey();
                 }
+                cancelKey();
                 break;
         }
-    }
-}
+    }}

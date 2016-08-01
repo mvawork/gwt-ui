@@ -37,7 +37,6 @@ public class PhoneBox extends ValueBox<String> implements KeyPressHandler, KeyDo
                 object = object.substring(2);
             if (object == null)
                 return null;
-
             return applyMask(object, false);
         }
 
