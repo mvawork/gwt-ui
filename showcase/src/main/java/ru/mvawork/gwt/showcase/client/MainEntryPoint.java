@@ -111,21 +111,21 @@ public class MainEntryPoint implements EntryPoint {
         phoneTestPanel.add(phoneBox);
         final Label phoneErrorLabel = new Label();
         phoneTestPanel.add(phoneErrorLabel);
-/*
-        dateBox.addDateFormatErrorHandler(new DateFormatErrorEvent.DateFormatErrorHandler() {
+
+         phoneBox.addPhoneNumFormatErrorHandler(new PhoneNumFormatErrorEvent.PhoneNumFormatErrorHandler() {
+             @Override
+             public void onPhoneNumFormatError(PhoneNumFormatErrorEvent event) {
+                 phoneErrorLabel.setText("Неверный номер телефона: " + event.getText());
+             }
+         });
+
+        phoneBox.addPhoneNumValueChangeHandler(new PhoneNumValueChangeEvent.PhoneNumValueChangeHandler() {
             @Override
-            public void onDateFormatError(DateFormatErrorEvent event) {
-                dateErrorLabel.setText("Неверная дата: " + event.getText());
+            public void onPhoneNumValueChange(PhoneNumValueChangeEvent event) {
+                phoneErrorLabel.setText("Ок");
             }
         });
 
-        dateBox.addDateValueChangeHandler(new DateValueChangeEvent.DateValueChangeHandler() {
-            @Override
-            public void onDateValueChange(DateValueChangeEvent event) {
-                dateErrorLabel.setText("Ок");
-            }
-        });
-*/
 
 
         RootPanel.get().add(phoneTestPanel);

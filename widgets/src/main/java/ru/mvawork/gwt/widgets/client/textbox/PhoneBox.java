@@ -7,44 +7,60 @@ import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.text.shared.Parser;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.ValueBox;
+import com.google.web.bindery.event.shared.HandlerRegistration;
+import ru.mvawork.gwt.widgets.client.events.PhoneNumFormatErrorEvent;
+import ru.mvawork.gwt.widgets.client.events.PhoneNumValueChangeEvent;
 
 import java.text.ParseException;
 
-public class PhoneBox extends ValueBox<String> implements KeyPressHandler, KeyDownHandler {
+public class PhoneBox extends ValueBox<String> implements KeyPressHandler, KeyDownHandler,
+        PhoneNumFormatErrorEvent.HasPhoneNumFormatErrorHandler, PhoneNumValueChangeEvent.HasPhoneNumValueChangeHandler {
 
     static final private String phoneMask = "+7(___)___-__-__";
     static final private int phoneMaskLengh = phoneMask.length();
 
-    private static class DateRender extends AbstractRenderer<String> {
+    @Override
+    public HandlerRegistration addPhoneNumFormatErrorHandler(PhoneNumFormatErrorEvent.PhoneNumFormatErrorHandler handler) {
+        return addHandler(handler, PhoneNumFormatErrorEvent.getType());
+    }
+
+    @Override
+    public com.google.gwt.event.shared.HandlerRegistration addPhoneNumValueChangeHandler(PhoneNumValueChangeEvent.PhoneNumValueChangeHandler handler) {
+        return addHandler(handler, PhoneNumValueChangeEvent.getType());
+    }
+
+    private static class PhoneNumRender extends AbstractRenderer<String> {
 
         @Override
         public String render(String object) {
+            if (object != null && object.substring(0, 2) == "+7")
+                object = object.substring(2);
             if (object == null)
                 return null;
+
             return applyMask(object, false);
         }
 
     }
 
-    private static class DateParser implements Parser<String> {
+    private static class PhoneNumParser implements Parser<String> {
         @Override
         public String parse(CharSequence text) throws ParseException {
             String unmaskedText = clearMask(text.toString());
             if (unmaskedText.length() == 0)
                 return null;
-            return unmaskedText;
+            return "+7" + unmaskedText;
         }
     }
 
-    private static DateRender dateRender = new DateRender();
-    private static DateParser dateParser = new DateParser();
+    private static PhoneNumRender PhoneNumRender = new PhoneNumRender();
+    private static PhoneNumParser PhoneNumParser = new PhoneNumParser();
 
     public PhoneBox() {
-        super(Document.get().createTextInputElement(), dateRender, dateParser);
+        super(Document.get().createTextInputElement(), PhoneNumRender, PhoneNumParser);
         addDomHandler(this, KeyPressEvent.getType());
         addDomHandler(this, KeyDownEvent.getType());
-        sinkEvents(Event.ONPASTE | Event.FOCUSEVENTS);
-
+        sinkEvents(Event.ONPASTE | Event.FOCUSEVENTS | Event.MOUSEEVENTS);
     }
 
     @Override
@@ -59,14 +75,8 @@ public class PhoneBox extends ValueBox<String> implements KeyPressHandler, KeyDo
                         StringBuilder sb = new StringBuilder();
                         for (int i = 0; i < text.length(); i++) {
                             char c = text.charAt(i);
-                            switch (c) {
-                                case '0':case '1':case '2':
-                                case '3':case '4':case '5':
-                                case '6':case '7':case '8':
-                                case '9':
+                            if (Character.isDigit(c))
                                     sb.append(c);
-                                    break;
-                            }
                         }
                         setText(applyMask(sb.toString(), false));
                     }
@@ -79,37 +89,49 @@ public class PhoneBox extends ValueBox<String> implements KeyPressHandler, KeyDo
                     Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
                         @Override
                         public void execute() {
-                            setCursorPos(0);
+                            setCursorPos(3);
                         }
                     });
                 }
                 break;
             case Event.ONBLUR:
-                try {
-                    String phoneNum = getValue();
-                    // TODO: 29.07.2016 вызвать событие на валидный номер
-                } catch (Exception e) {
-                    // TODO: 29.07.2016  Вызвать событие инвалидный номер
+                String phoneNum = getValue();
+                if (phoneNum != null && phoneNum.length() != 12)
+                    fireEvent(new PhoneNumFormatErrorEvent(phoneNum));
+                else {
+                    setValue(phoneNum);
+                    fireEvent(new PhoneNumValueChangeEvent(phoneNum));
                 }
                 break;
+            case Event.ONMOUSEDOWN:
+                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        int curPos = getCursorPos();
+                        String ut = clearMask(getText());
+                        if (ut != null) {
+                            int maxPos = getMaskPos(ut, ut.length());
+                            if (curPos > maxPos)
+                                curPos = maxPos;
+                        }
+                        if (curPos < 3)
+                            curPos = 3;
+                        setCursorPos(curPos);
+                    }
+                });
+                break;
+
         }
     }
-
 
     private static String clearMask(String maskedText) {
         StringBuilder sb = new StringBuilder();
         for (int i = 3; i < maskedText.length(); i ++) {
             char c = maskedText.charAt(i);
-            switch (c) {
-                case '0':case '1':case '2':case '3':case '4':case '5': case '6':case '7':case '8':case '9':
-                    sb.append(c);
-                    break;
-                case '_':
-                    sb.append('_');
-                    break;
-            }
+            if (Character.isDigit(c))
+                sb.append(c);
         }
-        return sb.toString().trim();
+        return sb.toString();
     }
 
     private static String applyMask(String value, boolean trimMask) {
@@ -178,31 +200,47 @@ public class PhoneBox extends ValueBox<String> implements KeyPressHandler, KeyDo
                 final String ut = clearMask(mt);
                 int ul = ut.length();
                 final int n1 = getTextPos(mt, prevPos);
-                if (s > 0) {
-                    sb.append(ut, 0, n1);
-                    sb.append(ut, getTextPos(mt, prevPos + s), ul);
+                final int maxPos = getMaskPos(ut, ut.length());
+                if (maxPos < prevPos) {
                     Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
                         @Override
                         public void execute() {
-                            setCursorPos(getMaskPos(ut, n1));
+                            setCursorPos(maxPos);
                         }
                     });
                 } else {
-                    if (n1 > 0) {
-                        getMaskPos(ut, n1-1);
-                        sb.append(ut, 0, n1-1);
-                        sb.append(ut, n1, ul);
+                    if (s > 0) {
+                        sb.append(ut, 0, n1);
+                        sb.append(ut, getTextPos(mt, prevPos + s), ul);
                         Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
                             @Override
                             public void execute() {
-                                setCursorPos(n1 - 1> 0 ? getMaskPos(ut, n1-1) : 0);
+                                setCursorPos(getMaskPos(ut, n1));
                             }
                         });
                     } else {
-                        break;
+                        if (n1 > 0) {
+                            getMaskPos(ut, n1 - 1);
+                            sb.append(ut, 0, n1 - 1);
+                            sb.append(ut, n1, ul);
+                            Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
+                                @Override
+                                public void execute() {
+                                    setCursorPos(n1 - 1 > 0 ? getMaskPos(ut, n1 - 1) : 3);
+                                }
+                            });
+
+                        } else {
+                            Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
+                                @Override
+                                public void execute() {
+                                    setCursorPos(3);
+                                }
+                            });
+                        }
                     }
+                    setText(applyMask(sb.toString(), false));
                 }
-                setText(applyMask(sb.toString(), false));
                 cancelKey();
                 break;
         }
@@ -212,38 +250,24 @@ public class PhoneBox extends ValueBox<String> implements KeyPressHandler, KeyDo
     public void onKeyPress(KeyPressEvent event) {
         char c = event.getCharCode();
         if (c != 0) {
-            try {
-                switch (c) {
-                    case '0': case '1': case '2': case '3': case '4': case '5':
-                    case '6': case '7': case '8':
-                    case '9':
-                        int pos = getCursorPos();
-                        //Если не на последей позиции
-                        if (pos < phoneMaskLengh) {
-                            final String text = getText();
-                            // +7(
-                            if (pos < 3)
-                                pos = 3;
-                            char p = text.charAt(pos);
-                            if (p == ')' || p == '-')
-                                pos++;
-                            StringBuilder sb = new StringBuilder();
-                            sb.append(text, 0, pos);
-                            sb.append(c);
-                            sb.append(text, pos + 1, phoneMaskLengh);
-                            setText(sb.toString());
-                            final int fpos = pos + 1;
-                            Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
-                                @Override
-                                public void execute() {
-                                    setCursorPos(fpos + (text.charAt(fpos) == '.' ? 1 : 0));
-                                }
-                            });
-                        }
-                        break;
-                }
-            } finally {
-                cancelKey();
+            cancelKey();
+            if (Character.isDigit(c) && getSelectionLength() == 0) {
+                int pos = getCursorPos();
+                final String text = getText();
+                String value = clearMask(text);
+                final int n = getTextPos(text, pos);
+                StringBuilder sb = new StringBuilder();
+                sb.append(value, 0, n);
+                sb.append(c);
+                sb.append(value, n, value.length());
+                final String m = applyMask(sb.toString(), false);
+                setText(m);
+                Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        setCursorPos(getMaskPos(m, n+1));
+                    }
+                });
             }
         }
     }
