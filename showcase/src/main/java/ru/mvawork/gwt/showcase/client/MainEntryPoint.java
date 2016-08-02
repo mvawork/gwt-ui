@@ -15,7 +15,8 @@ import ru.mvawork.gwt.widgets.client.events.*;
 import ru.mvawork.gwt.widgets.client.sliders.HorizontalSliderBar;
 import ru.mvawork.gwt.widgets.client.textbox.CurrencyBox;
 import ru.mvawork.gwt.widgets.client.textbox.DateBox;
-import ru.mvawork.gwt.widgets.client.textbox.PhoneBox;
+import ru.mvawork.gwt.widgets.client.textbox.MaskBox;
+import ru.mvawork.gwt.widgets.client.textbox.PhoneNumBox;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -86,50 +87,19 @@ public class MainEntryPoint implements EntryPoint {
         RootPanel.get().add(horizontalPanel);
         //
         HorizontalPanel dateTestPanel = new HorizontalPanel();
-        final DateBox dateBox = new DateBox();
+        final MaskBox dateBox = new DateBox();
         dateTestPanel.add(dateBox);
         final Label dateErrorLabel = new Label();
         dateTestPanel.add(dateErrorLabel);
-        dateBox.addDateFormatErrorHandler(new DateFormatErrorEvent.DateFormatErrorHandler() {
-            @Override
-            public void onDateFormatError(DateFormatErrorEvent event) {
-                dateErrorLabel.setText("Неверная дата: " + event.getText());
-            }
-        });
-
-        dateBox.addDateValueChangeHandler(new DateValueChangeEvent.DateValueChangeHandler() {
-            @Override
-            public void onDateValueChange(DateValueChangeEvent event) {
-                dateErrorLabel.setText("Ок");
-            }
-        });
         RootPanel.get().add(dateTestPanel);
 
         // Телефон
         HorizontalPanel phoneTestPanel = new HorizontalPanel();
-        final PhoneBox phoneBox = new PhoneBox();
+        final MaskBox phoneBox = new PhoneNumBox();
         phoneTestPanel.add(phoneBox);
         final Label phoneErrorLabel = new Label();
         phoneTestPanel.add(phoneErrorLabel);
-
-         phoneBox.addPhoneNumFormatErrorHandler(new PhoneNumFormatErrorEvent.PhoneNumFormatErrorHandler() {
-             @Override
-             public void onPhoneNumFormatError(PhoneNumFormatErrorEvent event) {
-                 phoneErrorLabel.setText("Неверный номер телефона: " + event.getText());
-             }
-         });
-
-        phoneBox.addPhoneNumValueChangeHandler(new PhoneNumValueChangeEvent.PhoneNumValueChangeHandler() {
-            @Override
-            public void onPhoneNumValueChange(PhoneNumValueChangeEvent event) {
-                phoneErrorLabel.setText("Ок");
-            }
-        });
-
-
-
         RootPanel.get().add(phoneTestPanel);
-
 
 
     }
