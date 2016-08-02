@@ -83,12 +83,20 @@ public class PhoneBox extends ValueBox<String> implements KeyPressHandler, KeyDo
                 break;
             case Event.ONFOCUS:
                 String s = getText();
-                if (s == null || s.isEmpty()) {
+                if (s.isEmpty()) {
                     setText(phoneMask);
                     Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
                         @Override
                         public void execute() {
                             setCursorPos(3);
+                        }
+                    });
+                } else {
+                    final String v = clearMask(s);
+                    Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
+                        @Override
+                        public void execute() {
+                            setCursorPos(getMaskPos(v, v.length()));
                         }
                     });
                 }
