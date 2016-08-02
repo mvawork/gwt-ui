@@ -159,7 +159,10 @@ public class PhoneBox extends ValueBox<String> implements KeyPressHandler, KeyDo
     }
 
     private int getMaskPos(String text, int pos) {
-        return applyMask(text.substring(0, pos), true).length();
+        int maskPos = applyMask(text.substring(0, pos), true).length();
+        while (maskPos < phoneMaskLengh && phoneMask.charAt(maskPos) != '_')
+            maskPos++;
+        return maskPos;
     }
 
     @Override
