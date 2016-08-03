@@ -70,6 +70,8 @@ class MaskParser extends AbstractRenderer<String> implements Parser<String> {
 
 
     String applyMask(String value, boolean trimMask) {
+        if (value == null)
+            value = "";
         StringBuilder sb = new StringBuilder();
         int n = 0;
         for (int i = 0; i < inputChars.size(); i++){
