@@ -59,8 +59,9 @@ public class MaskBox extends ValueBox<String> implements KeyPressHandler, KeyDow
                 break;
             case Event.ONBLUR:
                 String value = getValue();
+                if (value.isEmpty())
+                    setText("");
                 fireEvent(new MaskValueChangeEvent(value));
-                setValue(value.isEmpty() ? null : value);
                 break;
             case Event.ONMOUSEDOWN:
                 Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -201,7 +202,7 @@ public class MaskBox extends ValueBox<String> implements KeyPressHandler, KeyDow
     }
 
     @Override
-    public com.google.gwt.event.shared.HandlerRegistration addPhoneNumValueChangeHandler(MaskValueChangeEvent.MaskValueChangeHandler handler) {
+    public com.google.gwt.event.shared.HandlerRegistration addMaskValueChangeHandler(MaskValueChangeEvent.MaskValueChangeHandler handler) {
         return addHandler(handler, MaskValueChangeEvent.getType());
     }
 }

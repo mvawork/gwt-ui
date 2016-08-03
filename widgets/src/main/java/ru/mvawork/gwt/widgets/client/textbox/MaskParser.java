@@ -144,8 +144,6 @@ class MaskParser extends AbstractRenderer<String> implements Parser<String> {
 
     @Override
     public String render(String object) {
-        if (object == null)
-            return null;
         return applyMask(object, false);
     }
 

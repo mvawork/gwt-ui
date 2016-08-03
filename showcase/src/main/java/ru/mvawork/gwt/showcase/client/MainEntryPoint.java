@@ -11,12 +11,12 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import ru.mvawork.gwt.showcase.client.sliders.SimpleHorizontalSliderBar;
-import ru.mvawork.gwt.widgets.client.events.*;
+import ru.mvawork.gwt.widgets.client.events.BarValueChangeEvent;
+import ru.mvawork.gwt.widgets.client.events.CurrencyFormatErrorEvent;
+import ru.mvawork.gwt.widgets.client.events.CurrencyValueChangeEvent;
 import ru.mvawork.gwt.widgets.client.sliders.HorizontalSliderBar;
 import ru.mvawork.gwt.widgets.client.textbox.CurrencyBox;
-import ru.mvawork.gwt.widgets.client.textbox.DateBox;
 import ru.mvawork.gwt.widgets.client.textbox.MaskBox;
-import ru.mvawork.gwt.widgets.client.textbox.PhoneNumBox;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -87,7 +87,7 @@ public class MainEntryPoint implements EntryPoint {
         RootPanel.get().add(horizontalPanel);
         //
         HorizontalPanel dateTestPanel = new HorizontalPanel();
-        final MaskBox dateBox = new DateBox();
+        final MaskBox dateBox = new MaskBox("99.99.9999");
         dateTestPanel.add(dateBox);
         final Label dateErrorLabel = new Label();
         dateTestPanel.add(dateErrorLabel);
@@ -95,7 +95,7 @@ public class MainEntryPoint implements EntryPoint {
 
         // Телефон
         HorizontalPanel phoneTestPanel = new HorizontalPanel();
-        final MaskBox phoneBox = new PhoneNumBox();
+        final MaskBox phoneBox = new MaskBox("+7(999)999-99-99");
         phoneTestPanel.add(phoneBox);
         final Label phoneErrorLabel = new Label();
         phoneTestPanel.add(phoneErrorLabel);

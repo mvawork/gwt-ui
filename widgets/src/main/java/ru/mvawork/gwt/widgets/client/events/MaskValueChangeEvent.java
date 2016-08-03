@@ -7,11 +7,11 @@ import com.google.gwt.event.shared.HandlerRegistration;
 public class MaskValueChangeEvent extends GwtEvent<MaskValueChangeEvent.MaskValueChangeHandler> {
 
     public interface MaskValueChangeHandler extends EventHandler {
-        void onPhoneNumValueChange(MaskValueChangeEvent event);
+        void onMaskValueChange(MaskValueChangeEvent event);
     }
 
     public interface HasMaskValueChangeHandler {
-        HandlerRegistration addPhoneNumValueChangeHandler(MaskValueChangeHandler handler);
+        HandlerRegistration addMaskValueChangeHandler(MaskValueChangeHandler handler);
     }
 
     private static Type<MaskValueChangeHandler> type = new Type<>();
@@ -20,6 +20,10 @@ public class MaskValueChangeEvent extends GwtEvent<MaskValueChangeEvent.MaskValu
 
     public MaskValueChangeEvent(String value) {
         this.value = value;
+    }
+
+    public String getValue() {
+        return value;
     }
 
     public static Type<MaskValueChangeHandler> getType() {
@@ -33,7 +37,7 @@ public class MaskValueChangeEvent extends GwtEvent<MaskValueChangeEvent.MaskValu
 
     @Override
     protected void dispatch(MaskValueChangeHandler handler) {
-        handler.onPhoneNumValueChange(this);
+        handler.onMaskValueChange(this);
     }
 
 }
