@@ -14,9 +14,11 @@ import ru.mvawork.gwt.showcase.client.sliders.SimpleHorizontalSliderBar;
 import ru.mvawork.gwt.widgets.client.events.BarValueChangeEvent;
 import ru.mvawork.gwt.widgets.client.events.CurrencyFormatErrorEvent;
 import ru.mvawork.gwt.widgets.client.events.CurrencyValueChangeEvent;
+import ru.mvawork.gwt.widgets.client.events.WindowCloseEvent;
 import ru.mvawork.gwt.widgets.client.sliders.HorizontalSliderBar;
 import ru.mvawork.gwt.widgets.client.textbox.CurrencyBox;
 import ru.mvawork.gwt.widgets.client.textbox.MaskBox;
+import ru.mvawork.gwt.widgets.client.window.ApplicationWindow;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ public class MainEntryPoint implements EntryPoint {
         for (Integer srok : srokList) {
             srokListBox.addItem(srok + "мес.");
         }
+
 
         RootPanel.get().add(srokListBox);
 
@@ -59,6 +62,7 @@ public class MainEntryPoint implements EntryPoint {
         });
 
         sliderBar.setSelectedIndex(srokList.size() - 1);
+
 
         HorizontalPanel horizontalPanel = new HorizontalPanel();
         CurrencyBox moneyInputBox = new CurrencyBox();
@@ -100,6 +104,19 @@ public class MainEntryPoint implements EntryPoint {
         final Label phoneErrorLabel = new Label();
         phoneTestPanel.add(phoneErrorLabel);
         RootPanel.get().add(phoneTestPanel);
+
+        ApplicationWindow applicationWindow = new ApplicationWindow();
+        applicationWindow.setTitle("Это окно приложения");
+        applicationWindow.addWindowCloseHandler(new WindowCloseEvent.WindowCloseHandler() {
+            @Override
+            public void onWindowClose(WindowCloseEvent event) {
+                Window.alert("close");
+            }
+        });
+
+        applicationWindow.setWidth("500px");
+        RootPanel.get().add(applicationWindow);
+
 
 
     }

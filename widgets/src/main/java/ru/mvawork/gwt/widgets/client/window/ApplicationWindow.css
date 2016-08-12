@@ -1,0 +1,35 @@
+@charset "UTF-8";
+
+.windowPanel {
+    position: absolute;
+}
+
+.headerPanel {
+    padding: 5px;
+}
+.dragHeaderPanel {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.titlePanel {
+
+}
+
+@sprite .closeButton {
+    display: inline-block;
+    gwt-image: "closeButtonImage";
+}
+
+@sprite .closeButton:hover {
+    gwt-image: "closeButtonOverImage";
+}
+
+.bodyPanel {
+
+}
+
+.actionHeaderPanel {
+    cursor: pointer;
+    float: right;
+}

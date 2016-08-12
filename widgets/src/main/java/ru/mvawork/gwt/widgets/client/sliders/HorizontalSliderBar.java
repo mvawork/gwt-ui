@@ -40,10 +40,6 @@ public abstract class HorizontalSliderBar<T> extends Composite implements HasBar
             sinkEvents(Event.ONMOUSEDOWN | Event.ONMOUSEMOVE | Event.ONMOUSEUP);
         }
 
-        private int getDragPosition() {
-            return getElement().getOffsetLeft();
-        }
-
         @Override
         public void onBrowserEvent(Event event) {
             super.onBrowserEvent(event);
@@ -54,15 +50,15 @@ public abstract class HorizontalSliderBar<T> extends Composite implements HasBar
                     DOM.setCapture(getElement());
                     inDrag = true;
                     touchPosition = event.getClientX();
-                    minTouchPosition = touchPosition - getDragPosition() + minDragPos;
-                    maxTouchPosition = minTouchPosition + maxDragPos - minDragPos;
+                    minTouchPosition = touchPosition - getElement().getOffsetLeft() + minLeftPos;
+                    maxTouchPosition = minTouchPosition + maxLeftPos - minLeftPos;
                     break;
                 case Event.ONMOUSEMOVE:
                     if (inDrag) {
                         event.preventDefault();
                         event.stopPropagation();
-                        int newTochPosition = checkValue(event.getClientX(), minTouchPosition, maxTouchPosition);
-                        setDragPosition(getDragPosition() + newTochPosition - touchPosition);
+                        int newTochPosition = checkMinMaxValue(event.getClientX(), minTouchPosition, maxTouchPosition);
+                        setDragPosition(getElement().getOffsetLeft() + newTochPosition - touchPosition);
                         touchPosition = newTochPosition;
                     }
 
@@ -71,8 +67,8 @@ public abstract class HorizontalSliderBar<T> extends Composite implements HasBar
                     event.preventDefault();
                     event.stopPropagation();
                     inDrag = false;
-                    DOM.releaseCapture(drag.getElement());
-                    setSelectedIndex(getIndexFromPosition(getDragPosition()));
+                    DOM.releaseCapture(getElement());
+                    setSelectedIndex(getIndexFromPosition(getElement().getOffsetLeft()));
                     break;
             }
         }
@@ -86,7 +82,7 @@ public abstract class HorizontalSliderBar<T> extends Composite implements HasBar
 
 
     private int maxIndex, index;
-    private int minDragPos, maxDragPos;
+    private int minLeftPos, maxLeftPos;
 
     private int barWidth;
     private int dragTop;
@@ -137,7 +133,7 @@ public abstract class HorizontalSliderBar<T> extends Composite implements HasBar
         });
     }
 
-    private int checkValue(int value, int minValue, int maxValue) {
+    private int checkMinMaxValue(int value, int minValue, int maxValue) {
         if (minValue > maxValue)
             throw new RuntimeException("MinValue is more than MaxValue");
         value = value < minValue ? minValue : value;
@@ -145,13 +141,13 @@ public abstract class HorizontalSliderBar<T> extends Composite implements HasBar
     }
 
     private int getIndexFromPosition(int position) {
-        return Math.round((float)(position - minDragPos)/step);
+        return Math.round((float)(position - minLeftPos)/step);
     }
 
     private void setDragPosition(int position) {
-        position = checkValue(position, minDragPos, maxDragPos);
+        position = checkMinMaxValue(position, minLeftPos, maxLeftPos);
         rootPanel.setWidgetPosition(drag, position, dragTop);
-        progress.setWidth(position - minDragPos + "px");
+        progress.setWidth(position - minLeftPos + "px");
 
     }
 
@@ -186,7 +182,7 @@ public abstract class HorizontalSliderBar<T> extends Composite implements HasBar
         dragTop = (h-h1)/2;
         int scaleTop = (h-h2)/2;
         /* Левый край позунка 0 */
-        minDragPos = 0;
+        minLeftPos = 0;
         /* Отступ слева шкалы исходя из ширины ползунка */
         int scaleLeft = (int) Math.floor(drag.getOffsetWidth() / 2 + 0.5);
         int scaleWidth = barWidth - scaleLeft * 2;
@@ -194,7 +190,7 @@ public abstract class HorizontalSliderBar<T> extends Composite implements HasBar
         scaleWidth = scaleWidth - scaleWidth % maxIndex;
         scale.setWidth(scaleWidth + "px");
         /* Максимальная позиция левого края ползунка */
-        maxDragPos = minDragPos + scaleWidth;
+        maxLeftPos = minLeftPos + scaleWidth;
         /* Шаг перемещения ползунка */
         step = scaleWidth / maxIndex;
         /* Разместить шкалу */
