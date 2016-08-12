@@ -34,6 +34,9 @@
                 <includes>
                     <include>**/*.gwt.xml</include>
                     <include>**/*.java</include>
+                    <include>**/*.png</include>
+                    <include>**/*.ui.xml</include>
+                    <include>**/*.css</include>
                 </includes>
             </resource>
         </resources>

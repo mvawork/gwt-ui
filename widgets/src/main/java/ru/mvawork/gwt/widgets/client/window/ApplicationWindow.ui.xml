@@ -14,7 +14,7 @@
                 <g:FlowPanel styleName="{style.closeButton}" ui:field="closeButton" />
             </g:FlowPanel>
         </g:FlowPanel>
-        <g:FlowPanel styleName="{style.bodyPanel}" ui:field="bodyPanel"/>
+        <g:SimplePanel styleName="{style.contentPanel}" ui:field="contentPanel"/>
     </g:FlowPanel>
 
 </ui:UiBinder>

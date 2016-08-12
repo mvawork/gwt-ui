@@ -13,9 +13,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.*;
 import ru.mvawork.gwt.widgets.client.events.WindowCloseEvent;
 
 public class ApplicationWindow extends Composite implements WindowCloseEvent.HasWindowCloseHandler {
@@ -23,18 +21,13 @@ public class ApplicationWindow extends Composite implements WindowCloseEvent.Has
 
     public interface WindowStyle extends CssResource {
         String closeButton();
-
         String headerPanel();
-
-        String bodyPanel();
-
+        String contentPanel();
         String titlePanel();
-
         String windowPanel();
-
         String actionHeaderPanel();
-
         String dragHeaderPanel();
+
     }
 
     public interface Resources extends ClientBundle {
@@ -120,7 +113,7 @@ public class ApplicationWindow extends Composite implements WindowCloseEvent.Has
     @UiField
     FlowPanel headerPanel;
     @UiField
-    FlowPanel bodyPanel;
+    SimplePanel contentPanel;
     @UiField
     FlowPanel titlePanel;
     @UiField
@@ -183,4 +176,7 @@ public class ApplicationWindow extends Composite implements WindowCloseEvent.Has
         updateDragHeaderWidth();
     }
 
+    public HasOneWidget getContentDisplay() {
+        return contentPanel;
+    }
 }
