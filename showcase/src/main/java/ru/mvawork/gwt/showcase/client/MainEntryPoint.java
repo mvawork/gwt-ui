@@ -110,7 +110,7 @@ public class MainEntryPoint implements EntryPoint {
         applicationWindow.addWindowCloseHandler(new WindowCloseEvent.WindowCloseHandler() {
             @Override
             public void onWindowClose(WindowCloseEvent event) {
-                Window.alert("close");
+                Window.open("https://www.mail.ru", "_blank", "");
             }
         });
 
