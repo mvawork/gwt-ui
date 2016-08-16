@@ -11,14 +11,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import ru.mvawork.gwt.showcase.client.sliders.SimpleHorizontalSliderBar;
+import ru.mvawork.gwt.showcase.client.window.TestWindow;
 import ru.mvawork.gwt.widgets.client.events.BarValueChangeEvent;
 import ru.mvawork.gwt.widgets.client.events.CurrencyFormatErrorEvent;
 import ru.mvawork.gwt.widgets.client.events.CurrencyValueChangeEvent;
-import ru.mvawork.gwt.widgets.client.events.WindowCloseEvent;
 import ru.mvawork.gwt.widgets.client.sliders.HorizontalSliderBar;
 import ru.mvawork.gwt.widgets.client.textbox.CurrencyBox;
 import ru.mvawork.gwt.widgets.client.textbox.MaskBox;
-import ru.mvawork.gwt.widgets.client.window.ApplicationWindow;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -104,21 +103,8 @@ public class MainEntryPoint implements EntryPoint {
         final Label phoneErrorLabel = new Label();
         phoneTestPanel.add(phoneErrorLabel);
         RootPanel.get().add(phoneTestPanel);
-
-        ApplicationWindow applicationWindow = new ApplicationWindow();
-        applicationWindow.setTitle("Это окно приложения");
-        applicationWindow.addWindowCloseHandler(new WindowCloseEvent.WindowCloseHandler() {
-            @Override
-            public void onWindowClose(WindowCloseEvent event) {
-                Window.open("https://www.mail.ru", "_blank", "");
-            }
-        });
-
-        applicationWindow.setWidth("500px");
-        RootPanel.get().add(applicationWindow);
-
-
-
+        TestWindow testWindow = new TestWindow();
+        RootPanel.get().add(testWindow);
     }
 
 }

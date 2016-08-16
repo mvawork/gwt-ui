@@ -5,13 +5,10 @@
 
     <g:FlowPanel styleName="{style.windowPanel}" ui:field="windowPanel">
         <g:FlowPanel styleName="{style.headerPanel}" ui:field="headerPanel" >
-            <g:FlowPanel styleName="{style.dragHeaderPanel}" ui:field="dragHeaderPanel">
-                <g:FlowPanel ui:field="titlePanel" styleName="{style.titlePanel}">
-                    <g:Label ui:field="titleLabel"/>
-                </g:FlowPanel>
+            <g:FlowPanel ui:field="titlePanel" styleName="{style.titlePanel}">
+                <g:Label ui:field="titleLabel"> </g:Label>
             </g:FlowPanel>
             <g:FlowPanel styleName="{style.actionHeaderPanel}" ui:field="actionHeaderPanel">
-                <g:FlowPanel styleName="{style.closeButton}" ui:field="closeButton" />
             </g:FlowPanel>
         </g:FlowPanel>
         <g:SimplePanel styleName="{style.contentPanel}" ui:field="contentPanel"/>

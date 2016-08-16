@@ -1,0 +1,15 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:m='urn:import:ru.mvawork.gwt.widgets.client.window' >
+
+    <m:ApplicationWindow ui:field="testWindow" title="Информационное окно">
+        <m:content>
+            <g:HTMLPanel>
+                <g:Label>Заголовок 1</g:Label>
+                <g:Button>Кнопка 1</g:Button>
+            </g:HTMLPanel>
+        </m:content>
+
+    </m:ApplicationWindow>
+
+</ui:UiBinder>

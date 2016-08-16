@@ -1,19 +1,24 @@
 @charset "UTF-8";
 
 .windowPanel {
+    border: 1px solid #b5b5b5;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
     position: absolute;
+    background-image: linear-gradient(to bottom, #f7f7f7 0%, #f7f7f7 1%, #f2f2f2 1%, #e0e0e0 15%, #e0e0e0 100%);
+    cursor: default;
+    box-sizing: border-box;
+    background-size: 100%;
 }
 
 .headerPanel {
     padding: 5px;
-}
-.dragHeaderPanel {
-    display: inline-block;
-    cursor: pointer;
+    overflow: hidden;
 }
 
 .titlePanel {
-
+    float: left;
+    margin-right: 5px;
 }
 
 @sprite .closeButton {
@@ -26,7 +31,9 @@
 }
 
 .contentPanel {
-
+    border: 1px solid #b5b5b5;
+    background-color: white;
+    padding: 5px;
 }
 
 .actionHeaderPanel {

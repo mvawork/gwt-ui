@@ -1,22 +1,26 @@
 package ru.mvawork.gwt.widgets.client.window;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiChild;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
 import ru.mvawork.gwt.widgets.client.events.WindowCloseEvent;
 
+import java.util.logging.Logger;
+
+@SuppressWarnings("unused")
 public class ApplicationWindow extends Composite implements WindowCloseEvent.HasWindowCloseHandler {
+
+    private static Logger log = Logger.getLogger(ApplicationWindow.class.getName());
 
 
     public interface WindowStyle extends CssResource {
@@ -26,8 +30,6 @@ public class ApplicationWindow extends Composite implements WindowCloseEvent.Has
         String titlePanel();
         String windowPanel();
         String actionHeaderPanel();
-        String dragHeaderPanel();
-
     }
 
     public interface Resources extends ClientBundle {
@@ -56,14 +58,32 @@ public class ApplicationWindow extends Composite implements WindowCloseEvent.Has
 
     }
 
+    private class ClickPanel extends FlowPanel implements HasClickHandlers {
+
+        ClickPanel() {
+            addDomHandler(new MouseDownHandler() {
+                @Override
+                public void onMouseDown(MouseDownEvent event) {
+                    event.stopPropagation();
+                    event.preventDefault();
+                }
+            }, MouseDownEvent.getType());
+        }
+
+        @Override
+        public HandlerRegistration addClickHandler(ClickHandler handler) {
+            return addDomHandler(handler, ClickEvent.getType());
+        }
+
+    }
+
     private class DragHeaderPanel extends FlowPanel {
 
-        private boolean isDraging = false;
         private int touchPositionX;
         private int touchPositionY;
 
-        public DragHeaderPanel() {
-            sinkEvents(Event.ONMOUSEDOWN | Event.ONMOUSEMOVE | Event.ONMOUSEUP);
+        DragHeaderPanel() {
+            sinkEvents(Event.ONMOUSEDOWN);
         }
 
         @Override
@@ -75,29 +95,21 @@ public class ApplicationWindow extends Composite implements WindowCloseEvent.Has
                     event.preventDefault();
                     event.stopPropagation();
                     DOM.setCapture(getElement());
-                    isDraging = true;
                     touchPositionX = event.getClientX();
                     touchPositionY = event.getClientY();
                     break;
                 case Event.ONMOUSEMOVE:
-                    if (isDraging) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        int newTouchPositionX = event.getClientX();
-                        newTouchPositionX = newTouchPositionX < 0 ? 0 : newTouchPositionX;
-                        int newTouchPositionY = event.getClientY();
-                        newTouchPositionY = newTouchPositionY < 0 ? 0 : newTouchPositionY;
-                        int windowLeft =  windowPanel.getElement().getOffsetLeft() + newTouchPositionX - touchPositionX;
-                        int windowTop = windowPanel.getElement().getOffsetTop() + newTouchPositionY - touchPositionY;
-                        moveWindow(windowLeft, windowTop);
-                        touchPositionX = newTouchPositionX;
-                        touchPositionY = newTouchPositionY;
-                    }
+                    int newTouchPositionX = event.getClientX();
+                    newTouchPositionX = newTouchPositionX < 0 ? 0 : newTouchPositionX;
+                    int newTouchPositionY = event.getClientY();
+                    newTouchPositionY = newTouchPositionY < 0 ? 0 : newTouchPositionY;
+                    int windowLeft =  windowPanel.getElement().getOffsetLeft() + newTouchPositionX - touchPositionX;
+                    int windowTop = windowPanel.getElement().getOffsetTop() + newTouchPositionY - touchPositionY;
+                    moveWindow(windowLeft, windowTop);
+                    touchPositionX = newTouchPositionX;
+                    touchPositionY = newTouchPositionY;
                     break;
                 case Event.ONMOUSEUP:
-                    event.preventDefault();
-                    event.stopPropagation();
-                    isDraging = false;
                     DOM.releaseCapture(getElement());
                     break;
             }
@@ -105,12 +117,11 @@ public class ApplicationWindow extends Composite implements WindowCloseEvent.Has
 
     }
 
-
     @UiField(provided = true)
     WindowStyle style = appearance.resources.style();
     @UiField
     Label titleLabel;
-    @UiField
+    @UiField(provided = true)
     FlowPanel headerPanel;
     @UiField
     SimplePanel contentPanel;
@@ -118,22 +129,15 @@ public class ApplicationWindow extends Composite implements WindowCloseEvent.Has
     FlowPanel titlePanel;
     @UiField
     FlowPanel windowPanel;
-    @UiField(provided = true)
-    FlowPanel dragHeaderPanel;
-    @UiField
-    FlowPanel closeButton;
     @UiField
     FlowPanel actionHeaderPanel;
 
+    private ClickPanel closeButton;
+
+
     public ApplicationWindow() {
-        dragHeaderPanel = new DragHeaderPanel();
+        headerPanel = new DragHeaderPanel();
         initWidget(ourUiBinder.createAndBindUi(this));
-        closeButton.addDomHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                fireEvent(new WindowCloseEvent());
-            }
-        }, ClickEvent.getType());
     }
 
     private void moveWindow(int left, int top) {
@@ -152,31 +156,22 @@ public class ApplicationWindow extends Composite implements WindowCloseEvent.Has
 
     @Override
     public HandlerRegistration addWindowCloseHandler(WindowCloseEvent.WindowCloseHandler handler) {
+        if (closeButton == null) {
+            closeButton = new ClickPanel();
+            closeButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    fireEvent(new WindowCloseEvent());
+                }
+            });
+            closeButton.setStyleName(style.closeButton());
+            actionHeaderPanel.add(closeButton);
+        }
         return addHandler(handler, WindowCloseEvent.getType());
     }
 
-    private void updateDragHeaderWidth() {
-        Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-                dragHeaderPanel.getElement().getStyle().setWidth(actionHeaderPanel.getElement().getOffsetLeft() - dragHeaderPanel.getElement().getOffsetLeft(), Style.Unit.PX);
-            }
-        });
-    }
-
-    @Override
-    protected void onLoad() {
-        super.onLoad();
-        updateDragHeaderWidth();
-    }
-
-    @Override
-    public void setWidth(String width) {
-        super.setWidth(width);
-        updateDragHeaderWidth();
-    }
-
-    public HasOneWidget getContentDisplay() {
-        return contentPanel;
+    @UiChild(tagname = "content", limit = 1)
+    public void addContent(Widget widget) {
+        contentPanel.setWidget(widget);
     }
 }
